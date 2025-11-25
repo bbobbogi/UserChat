@@ -1,6 +1,6 @@
 [versions]
 kotlin = "2.3.0-RC"
-paper = "1.21-R0.1-SNAPSHOT"
+paper = "1.20.4-R0.1-SNAPSHOT"
 velocity = "3.3.0-SNAPSHOT"
 shadow = "8.3.0"
 run-paper = "2.3.1"

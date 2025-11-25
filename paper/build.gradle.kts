@@ -76,7 +76,7 @@ dependencies {
 
 tasks {
     runServer {
-        minecraftVersion("1.21")
+        minecraftVersion("1.20.4")
     }
 
     test {
