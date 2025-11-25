@@ -1,6 +1,6 @@
 plugins {
-    kotlin("jvm")
-    id("com.gradleup.shadow")
+    alias(libs.plugins.kotlin.jvm)
+    alias(libs.plugins.shadow)
 }
 
 repositories {
@@ -13,10 +13,10 @@ dependencies {
     implementation(project(":common"))
 
     // Velocity API
-    compileOnly("com.velocitypowered:velocity-api:3.3.0-SNAPSHOT")
-    annotationProcessor("com.velocitypowered:velocity-api:3.3.0-SNAPSHOT")
+    compileOnly(libs.velocity.api)
+    annotationProcessor(libs.velocity.api)
 
-    implementation("org.jetbrains.kotlin:kotlin-stdlib")
+    implementation(libs.kotlin.stdlib)
 }
 
 tasks {
