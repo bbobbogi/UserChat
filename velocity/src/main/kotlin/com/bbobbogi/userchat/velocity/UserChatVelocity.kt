@@ -1,17 +1,14 @@
 package com.bbobbogi.userchat.velocity
 
 import com.bbobbogi.userchat.common.protocol.ChannelConstants
-import com.bbobbogi.userchat.common.protocol.GlobalChatMessage
 import com.bbobbogi.userchat.common.protocol.MessageType
 import com.bbobbogi.userchat.common.protocol.WhisperMessage
-import com.bbobbogi.userchat.common.protocol.WhisperNotFoundMessage
 import com.velocitypowered.api.event.Subscribe
 import com.velocitypowered.api.event.connection.PluginMessageEvent
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent
 import com.velocitypowered.api.plugin.Plugin
 import com.velocitypowered.api.proxy.ProxyServer
 import com.velocitypowered.api.proxy.messages.MinecraftChannelIdentifier
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.slf4j.Logger
 import java.io.ByteArrayInputStream
@@ -71,20 +68,17 @@ class UserChatVelocity @Inject constructor(
         val targetName = message.targetName
 
         // 대상 플레이어 찾기
-        val targetPlayer = server.getPlayer(targetName).orElse(null)
+        val targetPlayerOptional = server.getPlayer(targetName)
 
-        if (targetPlayer != null) {
+        if (targetPlayerOptional.isPresent) {
+            val targetPlayer = targetPlayerOptional.get()
             // 대상 플레이어가 있는 서버에만 전송
-            targetPlayer.currentServer.ifPresent { serverConn ->
-                serverConn.sendPluginMessage(channel, originalData)
+            val currentServerOptional = targetPlayer.currentServer
+            if (currentServerOptional.isPresent) {
+                currentServerOptional.get().sendPluginMessage(channel, originalData)
             }
         } else {
             // 플레이어를 찾을 수 없음 - 발신자에게 알림
-            val notFoundMessage = WhisperNotFoundMessage(
-                senderUuid = message.senderUuid,
-                targetName = targetName
-            )
-
             val notFoundData = encodeMessage(
                 MessageType.WHISPER_NOT_FOUND.name,
                 "${message.senderUuid}:$targetName"

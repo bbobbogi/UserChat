@@ -1,5 +1,6 @@
 plugins {
     alias(libs.plugins.kotlin.jvm)
+    alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.shadow)
     alias(libs.plugins.run.paper)
 }
@@ -58,7 +59,7 @@ tasks {
     }
 }
 
-val targetJavaVersion = 17
+val targetJavaVersion = 21
 kotlin {
     jvmToolchain(targetJavaVersion)
 }
