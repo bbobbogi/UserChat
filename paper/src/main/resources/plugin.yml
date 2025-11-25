@@ -1,7 +1,7 @@
 name: UserChat
 version: '${version}'
 main: com.bbobbogi.userchat.UserChatPlugin
-api-version: '1.20'
+api-version: '1.21'
 authors: [bbobbogi]
 description: 거리 기반 채팅, 전체 채팅, 귓속말 시스템
 

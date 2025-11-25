@@ -30,23 +30,3 @@ allprojects {
     group = "com.bbobbogi"
     version = "1.0.0-SNAPSHOT"
 }
-
-subprojects {
-    apply(plugin = "org.jetbrains.kotlin.jvm")
-
-    repositories {
-        mavenCentral()
-    }
-
-    tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
-        compilerOptions {
-            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
-        }
-    }
-
-    extensions.configure<JavaPluginExtension> {
-        toolchain {
-            languageVersion.set(JavaLanguageVersion.of(17))
-        }
-    }
-}
