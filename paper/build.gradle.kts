@@ -11,6 +11,7 @@ dependencies {
     // Paper API
     compileOnly(libs.paper.api)
     implementation(libs.kotlin.stdlib)
+    implementation(libs.kotlinx.serialization.json)
 
     // ChzzkMultipleUser modules
     compileOnly(libs.chzzk.common)
