@@ -1,0 +1,40 @@
+name: UserChat
+version: '${version}'
+main: com.bbobbogi.userchat.UserChatPlugin
+api-version: '1.20'
+authors: [bbobbogi]
+description: 거리 기반 채팅, 전체 채팅, 귓속말 시스템
+
+softdepend:
+  - ChzzkMultipleUser
+
+commands:
+  유저채팅:
+    aliases: [userchat, uc]
+    description: 유저 채팅 관리
+    permission: userchat.use
+  귓속말:
+    aliases: [귓, w, whisper]
+    description: 귓속말 전송
+    permission: userchat.whisper
+  답장:
+    aliases: [답, r, reply]
+    description: 마지막 귓속말 상대에게 답장
+    permission: userchat.whisper
+
+permissions:
+  userchat.use:
+    description: 기본 채팅 기능 사용
+    default: true
+  userchat.bypass:
+    description: 아이템 없이 전체 채팅 사용
+    default: op
+  userchat.admin:
+    description: 관리자 명령어 사용
+    default: op
+  userchat.whisper:
+    description: 귓속말 사용
+    default: true
+  userchat.whisper.bypass:
+    description: 귓속말 차단 무시
+    default: op

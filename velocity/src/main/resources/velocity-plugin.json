@@ -1,0 +1,9 @@
+{
+  "id": "userchat",
+  "name": "UserChat",
+  "version": "1.0.0-SNAPSHOT",
+  "description": "UserChat Velocity Module - Cross-server chat routing",
+  "authors": ["bbobbogi"],
+  "main": "com.bbobbogi.userchat.velocity.UserChatVelocity",
+  "dependencies": []
+}

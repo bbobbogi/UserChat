@@ -1,47 +1,52 @@
+import java.util.Properties
+
 plugins {
-    kotlin("jvm") version "2.3.0-RC"
-    id("com.gradleup.shadow") version "8.3.0"
-    id("xyz.jpenilla.run-paper") version "2.3.1"
+    kotlin("jvm") version "2.0.0" apply false
+    id("com.gradleup.shadow") version "8.3.0" apply false
+    id("xyz.jpenilla.run-paper") version "2.3.1" apply false
 }
 
-group = "com.bbobbogi"
-version = "0.0.1-SNAPSHOT"
-
-repositories {
-    mavenCentral()
-    maven("https://repo.papermc.io/repository/maven-public/") {
-        name = "papermc-repo"
+// GitHub Packages 인증 정보 (local.properties 또는 환경변수에서 읽기)
+val localProperties = Properties().apply {
+    val localPropertiesFile = rootProject.file("local.properties")
+    if (localPropertiesFile.exists()) {
+        load(localPropertiesFile.inputStream())
     }
 }
 
-dependencies {
-    compileOnly("io.papermc.paper:paper-api:1.21-R0.1-SNAPSHOT")
-    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
+val gprUser: String? = localProperties.getProperty("gpr.user")
+    ?: findProperty("gpr.user") as String?
+    ?: System.getenv("GITHUB_ACTOR")
+
+val gprToken: String? = localProperties.getProperty("gpr.token")
+    ?: findProperty("gpr.token") as String?
+    ?: System.getenv("GITHUB_TOKEN")
+
+// 하위 프로젝트에서 사용할 수 있도록 ext에 저장
+extra["gprUser"] = gprUser
+extra["gprToken"] = gprToken
+
+allprojects {
+    group = "com.bbobbogi"
+    version = "1.0.0-SNAPSHOT"
 }
 
-tasks {
-    runServer {
-        // Configure the Minecraft version for our task.
-        // This is the only required configuration besides applying the plugin.
-        // Your plugin's jar (or shadowJar if present) will be used automatically.
-        minecraftVersion("1.21")
+subprojects {
+    apply(plugin = "org.jetbrains.kotlin.jvm")
+
+    repositories {
+        mavenCentral()
     }
-}
 
-val targetJavaVersion = 21
-kotlin {
-    jvmToolchain(targetJavaVersion)
-}
+    tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
+        kotlinOptions {
+            jvmTarget = "17"
+        }
+    }
 
-tasks.build {
-    dependsOn("shadowJar")
-}
-
-tasks.processResources {
-    val props = mapOf("version" to version)
-    inputs.properties(props)
-    filteringCharset = "UTF-8"
-    filesMatching("plugin.yml") {
-        expand(props)
+    java {
+        toolchain {
+            languageVersion.set(JavaLanguageVersion.of(17))
+        }
     }
 }
