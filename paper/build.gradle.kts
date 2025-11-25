@@ -1,8 +1,63 @@
+import xyz.jpenilla.resourcefactory.bukkit.BukkitPluginYaml
+import xyz.jpenilla.resourcefactory.bukkit.Permission
+
 plugins {
     alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.shadow)
     alias(libs.plugins.run.paper)
+    alias(libs.plugins.resource.factory)
+}
+
+bukkitPluginYaml {
+    name = "UserChat"
+    version = project.version.toString()
+    main = "com.bbobbogi.userchat.UserChatPlugin"
+    apiVersion = "1.20"
+    authors = listOf("bbobbogi")
+    description = "거리 기반 채팅, 전체 채팅, 귓속말 시스템"
+    softDepend = listOf("ChzzkMultipleUser")
+
+    commands {
+        register("유저채팅") {
+            aliases = listOf("userchat", "uc")
+            description = "유저 채팅 관리"
+            permission = "userchat.use"
+        }
+        register("귓속말") {
+            aliases = listOf("귓", "w", "whisper")
+            description = "귓속말 전송"
+            permission = "userchat.whisper"
+        }
+        register("답장") {
+            aliases = listOf("답", "r", "reply")
+            description = "마지막 귓속말 상대에게 답장"
+            permission = "userchat.whisper"
+        }
+    }
+
+    permissions {
+        register("userchat.use") {
+            description = "기본 채팅 기능 사용"
+            default = Permission.Default.TRUE
+        }
+        register("userchat.bypass") {
+            description = "아이템 없이 전체 채팅 사용"
+            default = Permission.Default.OP
+        }
+        register("userchat.admin") {
+            description = "관리자 명령어 사용"
+            default = Permission.Default.OP
+        }
+        register("userchat.whisper") {
+            description = "귓속말 사용"
+            default = Permission.Default.TRUE
+        }
+        register("userchat.whisper.bypass") {
+            description = "귓속말 차단 무시"
+            default = Permission.Default.OP
+        }
+    }
 }
 
 dependencies {
@@ -49,18 +104,4 @@ tasks {
     build {
         dependsOn(shadowJar)
     }
-
-    processResources {
-        val props = mapOf("version" to project.version)
-        inputs.properties(props)
-        filteringCharset = "UTF-8"
-        filesMatching("plugin.yml") {
-            expand(props)
-        }
-    }
-}
-
-val targetJavaVersion = 21
-kotlin {
-    jvmToolchain(targetJavaVersion)
 }

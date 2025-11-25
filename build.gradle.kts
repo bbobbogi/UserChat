@@ -1,9 +1,12 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension
 import java.util.Properties
 
 plugins {
     alias(libs.plugins.kotlin.jvm) apply false
     alias(libs.plugins.shadow) apply false
     alias(libs.plugins.run.paper) apply false
+    alias(libs.plugins.resource.factory) apply false
 }
 
 // GitHub Packages 인증 정보 (local.properties 또는 환경변수에서 읽기)
@@ -68,6 +71,16 @@ subprojects {
             credentials {
                 username = gprUser ?: ""
                 password = gprToken ?: ""
+            }
+        }
+    }
+
+    val targetJavaVersion = 21
+    plugins.withId("org.jetbrains.kotlin.jvm") {
+        extensions.configure<KotlinJvmProjectExtension>("kotlin") {
+            jvmToolchain(targetJavaVersion)
+            compilerOptions {
+                jvmTarget.set(JvmTarget.fromTarget(targetJavaVersion.toString()))
             }
         }
     }
