@@ -1,5 +1,6 @@
 plugins {
     alias(libs.plugins.kotlin.jvm)
+    alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.shadow)
 }
 
@@ -11,6 +12,7 @@ dependencies {
     annotationProcessor(libs.velocity.api)
 
     implementation(libs.kotlin.stdlib)
+    implementation(libs.kotlinx.serialization.json)
 
     // Test dependencies
     testImplementation(kotlin("test"))
@@ -33,7 +35,7 @@ tasks {
     }
 }
 
-val targetJavaVersion = 17
+val targetJavaVersion = 21
 kotlin {
     jvmToolchain(targetJavaVersion)
 }
