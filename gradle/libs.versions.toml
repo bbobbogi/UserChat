@@ -1,0 +1,29 @@
+[versions]
+kotlin = "2.0.0"
+paper = "1.20.4-R0.1-SNAPSHOT"
+velocity = "3.3.0-SNAPSHOT"
+shadow = "8.3.0"
+run-paper = "2.3.1"
+kotlinx-serialization = "1.6.3"
+chzzk = "0.0.2"
+
+[libraries]
+# Paper API
+paper-api = { group = "io.papermc.paper", name = "paper-api", version.ref = "paper" }
+
+# Velocity API
+velocity-api = { group = "com.velocitypowered", name = "velocity-api", version.ref = "velocity" }
+
+# Kotlin
+kotlin-stdlib = { group = "org.jetbrains.kotlin", name = "kotlin-stdlib" }
+kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinx-serialization" }
+
+# ChzzkMultipleUser
+chzzk-common = { group = "io.papermc.chzzkmultipleuser", name = "common", version.ref = "chzzk" }
+chzzk-feature-integration = { group = "io.papermc.chzzkmultipleuser", name = "feature-integration", version.ref = "chzzk" }
+
+[plugins]
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+shadow = { id = "com.gradleup.shadow", version.ref = "shadow" }
+run-paper = { id = "xyz.jpenilla.run-paper", version.ref = "run-paper" }

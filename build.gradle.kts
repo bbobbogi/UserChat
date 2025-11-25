@@ -1,9 +1,9 @@
 import java.util.Properties
 
 plugins {
-    kotlin("jvm") version "2.0.0" apply false
-    id("com.gradleup.shadow") version "8.3.0" apply false
-    id("xyz.jpenilla.run-paper") version "2.3.1" apply false
+    alias(libs.plugins.kotlin.jvm) apply false
+    alias(libs.plugins.shadow) apply false
+    alias(libs.plugins.run.paper) apply false
 }
 
 // GitHub Packages 인증 정보 (local.properties 또는 환경변수에서 읽기)

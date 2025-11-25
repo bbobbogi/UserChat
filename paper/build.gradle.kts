@@ -1,12 +1,8 @@
-import java.util.Properties
-
 plugins {
-    kotlin("jvm")
-    id("com.gradleup.shadow")
-    id("xyz.jpenilla.run-paper")
+    alias(libs.plugins.kotlin.jvm)
+    alias(libs.plugins.shadow)
+    alias(libs.plugins.run.paper)
 }
-
-val chzzkVersion = "0.0.2"
 
 // 루트 프로젝트에서 인증 정보 가져오기
 val gprUser: String? = rootProject.extra["gprUser"] as String?
@@ -34,13 +30,13 @@ repositories {
 dependencies {
     implementation(project(":common"))
 
-    // Paper API (1.20 minimum support)
-    compileOnly("io.papermc.paper:paper-api:1.20.4-R0.1-SNAPSHOT")
-    implementation("org.jetbrains.kotlin:kotlin-stdlib")
+    // Paper API
+    compileOnly(libs.paper.api)
+    implementation(libs.kotlin.stdlib)
 
     // ChzzkMultipleUser modules (optional)
-    compileOnly("io.papermc.chzzkmultipleuser:common:$chzzkVersion")
-    compileOnly("io.papermc.chzzkmultipleuser:feature-integration:$chzzkVersion")
+    compileOnly(libs.chzzk.common)
+    compileOnly(libs.chzzk.feature.integration)
 }
 
 tasks {
