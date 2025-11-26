@@ -46,4 +46,37 @@ class UserNameProvider(
             logger.warning("[UserChat] 닉네임 가져오기 실패: ${e.message}")
             player.name
         }
+
+    /**
+     * 온라인 플레이어 검색 (앞에서부터 매칭, 명령어 자동완성용)
+     * @param prefix 검색할 접두사
+     * @param limit 최대 결과 개수
+     * @return 검색된 플레이어 이름 목록
+     */
+    fun searchByPrefix(
+        prefix: String,
+        limit: Int = 10,
+    ): List<String> =
+        try {
+            val service = userService
+            if (service != null) {
+                service
+                    .searchByPrefix(prefix, limit)
+                    .results
+                    .flatMap { listOfNotNull(it.nickname, it.minecraftName) }
+                    .distinct()
+            } else {
+                Bukkit
+                    .getOnlinePlayers()
+                    .map { it.name }
+                    .filter { it.lowercase().startsWith(prefix.lowercase()) }
+                    .take(limit)
+            }
+        } catch (e: Exception) {
+            Bukkit
+                .getOnlinePlayers()
+                .map { it.name }
+                .filter { it.lowercase().startsWith(prefix.lowercase()) }
+                .take(limit)
+        }
 }
