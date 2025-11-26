@@ -84,9 +84,9 @@ class UserChatVelocity @Inject constructor(
                 "${message.senderUuid}:$targetName"
             )
 
-            // 발신 서버 찾아서 전송
-            server.allServers.forEach { serverConn ->
-                serverConn.sendPluginMessage(channel, notFoundData)
+            // 발신 서버로만 전송
+            server.getServer(message.senderServerId).ifPresent { senderServer ->
+                senderServer.sendPluginMessage(channel, notFoundData)
             }
         }
     }
