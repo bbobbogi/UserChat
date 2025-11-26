@@ -19,11 +19,11 @@ val localProperties = Properties().apply {
 }
 
 val gprUser: String? = localProperties.getProperty("gpr.user")
-    ?: findProperty("gpr.user") as String?
+    ?: (findProperty("gpr.user") as? String)
     ?: System.getenv("GITHUB_ACTOR")
 
 val gprToken: String? = localProperties.getProperty("gpr.token")
-    ?: findProperty("gpr.token") as String?
+    ?: (findProperty("gpr.token") as? String)
     ?: System.getenv("GITHUB_TOKEN")
 
 // 하위 프로젝트에서 사용할 수 있도록 ext에 저장
