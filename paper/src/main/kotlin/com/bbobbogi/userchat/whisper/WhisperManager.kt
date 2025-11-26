@@ -14,6 +14,10 @@ class WhisperManager(
     private val messenger: ChatMessenger,
     private val userNameProvider: UserNameProvider
 ) {
+    companion object {
+        val NIL_UUID: UUID = UUID.fromString("00000000-0000-0000-0000-000000000000")
+    }
+
     // 마지막 귓속말 상대 (답장용)
     private val lastWhisperFrom = ConcurrentHashMap<UUID, WhisperTarget>()
 
@@ -98,7 +102,7 @@ class WhisperManager(
 
         // 답장 대상 저장 (원격)
         lastWhisperFrom[sender.uniqueId] = WhisperTarget(
-            uuid = UUID.randomUUID(),  // 원격이라 UUID 모름
+            uuid = NIL_UUID,
             name = targetName,
             serverId = "remote"
         )
