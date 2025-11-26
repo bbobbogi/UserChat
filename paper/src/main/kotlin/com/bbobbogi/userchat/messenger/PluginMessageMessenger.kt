@@ -16,6 +16,7 @@ import java.io.ByteArrayOutputStream
 import java.io.DataInputStream
 import java.io.DataOutputStream
 import java.util.UUID
+import java.util.logging.Level
 import java.util.logging.Logger
 
 /**
@@ -33,6 +34,7 @@ class PluginMessageMessenger(
     private var globalChatHandler: ((GlobalChatMessage) -> Unit)? = null
     private var whisperHandler: ((WhisperMessage) -> Unit)? = null
     private var whisperNotFoundHandler: ((UUID, String) -> Unit)? = null
+    private var lastNoPlayerLogTime = 0L
 
     override fun getMode(): MessagingMode = MessagingMode.PLUGIN_MESSAGE
     override fun getServerId(): String = serverId
@@ -137,7 +139,15 @@ class PluginMessageMessenger(
 
     private fun sendPluginMessage(data: ByteArray) {
         // 온라인 플레이어가 있어야 전송 가능
-        val player = Bukkit.getOnlinePlayers().firstOrNull() ?: return
+        val player = Bukkit.getOnlinePlayers().firstOrNull()
+        if (player == null) {
+            val now = System.currentTimeMillis()
+            if (now - lastNoPlayerLogTime > 30_000) {
+                logger.log(Level.FINE, "[UserChat] PluginMessage 전송 실패: 온라인 플레이어가 없습니다.")
+                lastNoPlayerLogTime = now
+            }
+            return
+        }
         player.sendPluginMessage(plugin, ChannelConstants.PLUGIN_MESSAGE_CHANNEL, data)
     }
 }
