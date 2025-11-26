@@ -29,13 +29,16 @@ dependencies {
     testImplementation(libs.junit.jupiter)
 }
 
+base {
+    archivesName.set("UserChat-Velocity")
+}
+
 tasks {
     test {
         useJUnitPlatform()
     }
 
     shadowJar {
-        archiveClassifier.set("")
         relocate("kotlinx.serialization", "com.bbobbogi.userchat.libs.kotlinx.serialization")
     }
 

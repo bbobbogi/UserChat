@@ -32,7 +32,8 @@ extra["gprToken"] = gprToken
 
 allprojects {
     group = "com.bbobbogi"
-    version = "1.0.0-SNAPSHOT"
+    version = findProperty("version")?.toString()?.takeIf { it != "unspecified" }
+        ?: "0.0.1-SNAPSHOT"
 }
 
 subprojects {
