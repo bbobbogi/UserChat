@@ -75,8 +75,12 @@ class RedisMessenger(
                 val type = data["type"] ?: return@consumeStream
                 if (type != MessageType.GLOBAL_CHAT.name) return@consumeStream
 
+                // 자기 서버 메시지는 무시 (조기 반환)
+                val messageServerId = data["serverId"] ?: return@consumeStream
+                if (messageServerId == serverId) return@consumeStream
+
                 val message = GlobalChatMessage(
-                    serverId = data["serverId"] ?: return@consumeStream,
+                    serverId = messageServerId,
                     serverDisplayName = data["serverDisplayName"] ?: "Server",
                     playerUuid = data["playerUuid"] ?: return@consumeStream,
                     playerName = data["playerName"] ?: "Unknown",
@@ -84,12 +88,9 @@ class RedisMessenger(
                     timestamp = data["timestamp"]?.toLongOrNull() ?: System.currentTimeMillis()
                 )
 
-                // 자기 서버 메시지는 무시
-                if (message.serverId != serverId) {
-                    Bukkit.getScheduler().runTask(plugin, Runnable {
-                        globalChatHandler?.invoke(message)
-                    })
-                }
+                Bukkit.getScheduler().runTask(plugin, Runnable {
+                    globalChatHandler?.invoke(message)
+                })
             } catch (e: Exception) {
                 logger.warning("[UserChat] 전체 채팅 메시지 처리 실패: ${e.message}")
             }
