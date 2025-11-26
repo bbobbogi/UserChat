@@ -87,6 +87,10 @@ dependencies {
     testImplementation(libs.junit.jupiter)
 }
 
+base {
+    archivesName.set("UserChat-Paper")
+}
+
 tasks {
     runServer {
         minecraftVersion("1.20.4")
@@ -97,7 +101,6 @@ tasks {
     }
 
     shadowJar {
-        archiveClassifier.set("")
         relocate("kotlinx.serialization", "com.bbobbogi.userchat.libs.kotlinx.serialization")
     }
 
