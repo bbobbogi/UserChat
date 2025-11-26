@@ -5,8 +5,8 @@ import com.bbobbogi.userchat.common.protocol.ChannelConstants
 import com.bbobbogi.userchat.common.protocol.GlobalChatMessage
 import com.bbobbogi.userchat.common.protocol.MessageType
 import com.bbobbogi.userchat.common.protocol.WhisperMessage
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
+import io.papermc.chzzkmultipleuser.messaging.MessagingProvider
+import io.papermc.chzzkmultipleuser.messaging.api.IStreamBroker
 import org.bukkit.Bukkit
 import org.bukkit.plugin.Plugin
 import java.util.UUID
@@ -20,11 +20,7 @@ class RedisMessenger(
     private val logger: Logger
 ) : ChatMessenger {
 
-    private val json = Json { ignoreUnknownKeys = true }
-
-    private var streamBroker: Any? = null
-    private var publishMethod: java.lang.reflect.Method? = null
-    private var consumeMethod: java.lang.reflect.Method? = null
+    private var streamBroker: IStreamBroker? = null
 
     private var serverId: String = "unknown"
     private var serverDisplayName: String = "Server"
@@ -39,31 +35,25 @@ class RedisMessenger(
 
     override fun initialize() {
         try {
-            // MessagingProvider에서 정보 가져오기
-            val providerClass = Class.forName("io.papermc.chzzkmultipleuser.messaging.MessagingProvider")
+            if (!MessagingProvider.isInitialized()) {
+                logger.warning("[UserChat] ChzzkMultipleUser MessagingProvider가 초기화되지 않았습니다.")
+                return
+            }
 
-            val getServerIdMethod = providerClass.getMethod("getServerId")
-            val getDisplayNameMethod = providerClass.getMethod("getServerDisplayName")
-            val getBrokerMethod = providerClass.getMethod("getStreamBroker")
-
-            serverId = (getServerIdMethod.invoke(null) as? String) ?: "unknown"
-            serverDisplayName = (getDisplayNameMethod.invoke(null) as? String) ?: "Server"
-            streamBroker = getBrokerMethod.invoke(null)
+            serverId = MessagingProvider.getServerId() ?: "unknown"
+            serverDisplayName = MessagingProvider.getServerDisplayName() ?: "Server"
+            streamBroker = MessagingProvider.getStreamBroker()
 
             if (streamBroker == null) {
                 logger.warning("[UserChat] Redis Stream Broker를 찾을 수 없습니다.")
                 return
             }
 
-            // IStreamBroker 메서드 가져오기
-            val brokerClass = streamBroker!!::class.java
-            publishMethod = brokerClass.getMethod("publishStream", String::class.java, Map::class.java)
-
             // Consumer 시작
             startConsumers()
 
             logger.info("[UserChat] Redis 메시징 초기화 완료 (서버: $serverId)")
-        } catch (e: ClassNotFoundException) {
+        } catch (e: NoClassDefFoundError) {
             logger.warning("[UserChat] ChzzkMultipleUser를 찾을 수 없습니다. Redis 모드를 사용할 수 없습니다.")
         } catch (e: Exception) {
             logger.warning("[UserChat] Redis 초기화 실패: ${e.message}")
@@ -72,18 +62,25 @@ class RedisMessenger(
     }
 
     private fun startConsumers() {
+        val broker = streamBroker ?: return
+
         // 전체 채팅 스트림 구독
-        subscribeToStream(ChannelConstants.REDIS_GLOBAL_CHAT_STREAM) { data ->
+        broker.consumeStream(
+            ChannelConstants.REDIS_GLOBAL_CHAT_STREAM,
+            ChannelConstants.REDIS_CONSUMER_GROUP,
+            serverId
+        ) { msg ->
             try {
-                val type = data["type"] ?: return@subscribeToStream
-                if (type != MessageType.GLOBAL_CHAT.name) return@subscribeToStream
+                val data = msg.data
+                val type = data["type"] ?: return@consumeStream
+                if (type != MessageType.GLOBAL_CHAT.name) return@consumeStream
 
                 val message = GlobalChatMessage(
-                    serverId = data["serverId"] ?: return@subscribeToStream,
+                    serverId = data["serverId"] ?: return@consumeStream,
                     serverDisplayName = data["serverDisplayName"] ?: "Server",
-                    playerUuid = data["playerUuid"] ?: return@subscribeToStream,
+                    playerUuid = data["playerUuid"] ?: return@consumeStream,
                     playerName = data["playerName"] ?: "Unknown",
-                    message = data["message"] ?: return@subscribeToStream,
+                    message = data["message"] ?: return@consumeStream,
                     timestamp = data["timestamp"]?.toLongOrNull() ?: System.currentTimeMillis()
                 )
 
@@ -99,18 +96,23 @@ class RedisMessenger(
         }
 
         // 귓속말 스트림 구독
-        subscribeToStream(ChannelConstants.REDIS_WHISPER_STREAM) { data ->
+        broker.consumeStream(
+            ChannelConstants.REDIS_WHISPER_STREAM,
+            ChannelConstants.REDIS_CONSUMER_GROUP,
+            serverId
+        ) { msg ->
             try {
-                val type = data["type"] ?: return@subscribeToStream
+                val data = msg.data
+                val type = data["type"] ?: return@consumeStream
 
                 when (type) {
                     MessageType.WHISPER.name -> {
                         val message = WhisperMessage(
-                            senderUuid = data["senderUuid"] ?: return@subscribeToStream,
+                            senderUuid = data["senderUuid"] ?: return@consumeStream,
                             senderName = data["senderName"] ?: "Unknown",
-                            senderServerId = data["senderServerId"] ?: return@subscribeToStream,
-                            targetName = data["targetName"] ?: return@subscribeToStream,
-                            message = data["message"] ?: return@subscribeToStream,
+                            senderServerId = data["senderServerId"] ?: return@consumeStream,
+                            targetName = data["targetName"] ?: return@consumeStream,
+                            message = data["message"] ?: return@consumeStream,
                             timestamp = data["timestamp"]?.toLongOrNull() ?: System.currentTimeMillis()
                         )
 
@@ -119,8 +121,8 @@ class RedisMessenger(
                         })
                     }
                     MessageType.WHISPER_NOT_FOUND.name -> {
-                        val senderUuid = data["senderUuid"] ?: return@subscribeToStream
-                        val targetName = data["targetName"] ?: return@subscribeToStream
+                        val senderUuid = data["senderUuid"] ?: return@consumeStream
+                        val targetName = data["targetName"] ?: return@consumeStream
 
                         Bukkit.getScheduler().runTask(plugin, Runnable {
                             whisperNotFoundHandler?.invoke(UUID.fromString(senderUuid), targetName)
@@ -133,45 +135,12 @@ class RedisMessenger(
         }
     }
 
-    @Suppress("UNCHECKED_CAST")
-    private fun subscribeToStream(streamKey: String, handler: (Map<String, String>) -> Unit) {
-        try {
-            val brokerClass = streamBroker!!::class.java
-
-            // consumeStream 메서드 찾기
-            val consumeMethod = brokerClass.methods.find {
-                it.name == "consumeStream" && it.parameterCount == 4
-            } ?: return
-
-            consumeMethod.invoke(
-                streamBroker,
-                streamKey,
-                ChannelConstants.REDIS_CONSUMER_GROUP,
-                serverId,
-                { msg: Any ->
-                    try {
-                        // StreamMessage에서 data 가져오기
-                        val dataMethod = msg::class.java.getMethod("getData")
-                        val data = dataMethod.invoke(msg) as? Map<String, String>
-                        if (data != null) {
-                            handler(data)
-                        }
-                    } catch (e: Exception) {
-                        logger.warning("[UserChat] Stream 메시지 파싱 실패: ${e.message}")
-                    }
-                }
-            )
-        } catch (e: Exception) {
-            logger.warning("[UserChat] Stream 구독 실패 ($streamKey): ${e.message}")
-        }
-    }
-
     override fun shutdown() {
-        // Stream consumer 정리는 ChzzkMultipleUser에서 처리
+        streamBroker?.stopAllConsuming()
     }
 
     override fun broadcastGlobalChat(playerUuid: UUID, playerName: String, message: String) {
-        if (streamBroker == null || publishMethod == null) return
+        val broker = streamBroker ?: return
 
         try {
             val data = mapOf(
@@ -184,7 +153,7 @@ class RedisMessenger(
                 "timestamp" to System.currentTimeMillis().toString()
             )
 
-            publishMethod?.invoke(streamBroker, ChannelConstants.REDIS_GLOBAL_CHAT_STREAM, data)
+            broker.publishStream(ChannelConstants.REDIS_GLOBAL_CHAT_STREAM, data)
         } catch (e: Exception) {
             logger.warning("[UserChat] 전체 채팅 전송 실패: ${e.message}")
         }
@@ -195,7 +164,7 @@ class RedisMessenger(
     }
 
     override fun sendWhisper(senderUuid: UUID, senderName: String, targetName: String, message: String) {
-        if (streamBroker == null || publishMethod == null) return
+        val broker = streamBroker ?: return
 
         try {
             val data = mapOf(
@@ -208,7 +177,7 @@ class RedisMessenger(
                 "timestamp" to System.currentTimeMillis().toString()
             )
 
-            publishMethod?.invoke(streamBroker, ChannelConstants.REDIS_WHISPER_STREAM, data)
+            broker.publishStream(ChannelConstants.REDIS_WHISPER_STREAM, data)
         } catch (e: Exception) {
             logger.warning("[UserChat] 귓속말 전송 실패: ${e.message}")
         }
