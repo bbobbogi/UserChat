@@ -13,13 +13,16 @@ class GlobalChatHandler(
     private val itemManager: GlobalChatItemManager,
     private val messenger: ChatMessenger,
     private val modeManager: ChatModeManager,
-    private val userNameProvider: UserNameProvider
+    private val userNameProvider: UserNameProvider,
 ) {
     /**
      * 전체 채팅 처리
      * @return 처리 결과 (SUCCESS, NO_ITEM, SWITCHED_TO_DISTANCE)
      */
-    fun handleChat(player: Player, message: String): GlobalChatResult {
+    fun handleChat(
+        player: Player,
+        message: String,
+    ): GlobalChatResult {
         val hasBypass = player.hasPermission("userchat.bypass")
 
         // bypass 권한이 없고 아이템이 필요한 경우
@@ -58,14 +61,23 @@ class GlobalChatHandler(
     /**
      * 원격 서버에서 받은 전체 채팅 처리
      */
-    fun handleRemoteMessage(serverId: String, serverDisplayName: String, playerName: String, message: String) {
+    fun handleRemoteMessage(
+        serverId: String,
+        serverDisplayName: String,
+        playerName: String,
+        message: String,
+    ) {
         // 자기 서버 메시지면 무시
         if (serverId == messenger.getServerId()) return
 
         broadcastLocal(serverDisplayName, playerName, message)
     }
 
-    private fun broadcastLocal(serverName: String, playerName: String, message: String) {
+    private fun broadcastLocal(
+        serverName: String,
+        playerName: String,
+        message: String,
+    ) {
         val formattedMessage = config.formatGlobalChat(serverName, playerName, message)
         Bukkit.getOnlinePlayers().forEach { it.sendMessage(formattedMessage) }
     }
@@ -73,6 +85,6 @@ class GlobalChatHandler(
     enum class GlobalChatResult {
         SUCCESS,
         NO_ITEM,
-        SWITCHED_TO_DISTANCE
+        SWITCHED_TO_DISTANCE,
     }
 }

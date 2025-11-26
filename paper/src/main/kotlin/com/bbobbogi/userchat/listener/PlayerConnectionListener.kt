@@ -8,9 +8,8 @@ import org.bukkit.event.player.PlayerQuitEvent
 
 class PlayerConnectionListener(
     private val modeManager: ChatModeManager,
-    private val whisperManager: WhisperManager
+    private val whisperManager: WhisperManager,
 ) : Listener {
-
     @EventHandler
     fun onPlayerQuit(event: PlayerQuitEvent) {
         val playerUuid = event.player.uniqueId

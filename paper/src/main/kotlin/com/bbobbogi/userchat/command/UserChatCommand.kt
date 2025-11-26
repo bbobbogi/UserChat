@@ -16,10 +16,15 @@ class UserChatCommand(
     private val config: UserChatConfig,
     private val modeManager: ChatModeManager,
     private val itemManager: GlobalChatItemManager,
-    private val settingsGui: SettingsGui
-) : CommandExecutor, TabCompleter {
-
-    override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
+    private val settingsGui: SettingsGui,
+) : CommandExecutor,
+    TabCompleter {
+    override fun onCommand(
+        sender: CommandSender,
+        command: Command,
+        label: String,
+        args: Array<out String>,
+    ): Boolean {
         if (args.isEmpty()) {
             sendHelp(sender)
             return true
@@ -36,7 +41,10 @@ class UserChatCommand(
         return true
     }
 
-    private fun handleMode(sender: CommandSender, args: Array<out String>) {
+    private fun handleMode(
+        sender: CommandSender,
+        args: Array<out String>,
+    ) {
         if (sender !is Player) {
             sender.sendMessage(config.getMessage("player-only"))
             return
@@ -59,7 +67,10 @@ class UserChatCommand(
         sender.sendMessage(config.getMessage("mode-changed", "mode" to newMode.displayName))
     }
 
-    private fun handleGive(sender: CommandSender, args: Array<out String>) {
+    private fun handleGive(
+        sender: CommandSender,
+        args: Array<out String>,
+    ) {
         if (!sender.hasPermission("userchat.admin")) {
             sender.sendMessage(config.getMessage("no-permission"))
             return
@@ -122,7 +133,7 @@ class UserChatCommand(
         sender: CommandSender,
         command: Command,
         alias: String,
-        args: Array<out String>
+        args: Array<out String>,
     ): List<String> {
         if (args.size == 1) {
             val subCommands = mutableListOf("모드", "mode")
@@ -138,7 +149,8 @@ class UserChatCommand(
                     .filter { it.startsWith(args[1].lowercase()) }
                 "아이템지급", "give" -> {
                     if (sender.hasPermission("userchat.admin")) {
-                        return Bukkit.getOnlinePlayers()
+                        return Bukkit
+                            .getOnlinePlayers()
                             .map { it.name }
                             .filter { it.lowercase().startsWith(args[1].lowercase()) }
                     }

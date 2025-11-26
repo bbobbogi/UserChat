@@ -9,10 +9,14 @@ import org.bukkit.entity.Player
 
 class ReplyCommand(
     private val config: UserChatConfig,
-    private val whisperManager: WhisperManager
+    private val whisperManager: WhisperManager,
 ) : CommandExecutor {
-
-    override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
+    override fun onCommand(
+        sender: CommandSender,
+        command: Command,
+        label: String,
+        args: Array<out String>,
+    ): Boolean {
         if (sender !is Player) {
             sender.sendMessage(config.getMessage("player-only"))
             return true

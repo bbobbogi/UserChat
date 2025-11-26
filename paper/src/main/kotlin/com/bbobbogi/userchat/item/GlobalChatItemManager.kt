@@ -9,15 +9,15 @@ import org.bukkit.plugin.Plugin
 
 class GlobalChatItemManager(
     private val plugin: Plugin,
-    private val config: UserChatConfig
+    private val config: UserChatConfig,
 ) {
     private val nbtKey = NamespacedKey(plugin, "global_chat_item")
 
     /**
      * 전체 채팅 아이템 생성
      */
-    fun createItem(amount: Int = 1): ItemStack {
-        return ItemStack(config.itemMaterial, amount).apply {
+    fun createItem(amount: Int = 1): ItemStack =
+        ItemStack(config.itemMaterial, amount).apply {
             editMeta { meta ->
                 meta.displayName(config.getItemDisplayNameComponent())
                 meta.lore(config.getItemLoreComponents())
@@ -30,30 +30,29 @@ class GlobalChatItemManager(
                 meta.persistentDataContainer.set(
                     nbtKey,
                     PersistentDataType.BYTE,
-                    1.toByte()
+                    1.toByte(),
                 )
             }
         }
-    }
 
     /**
      * 전체 채팅 아이템인지 확인
      */
     fun isGlobalChatItem(item: ItemStack?): Boolean {
         if (item == null || item.type != config.itemMaterial) return false
-        return item.itemMeta?.persistentDataContainer
+        return item.itemMeta
+            ?.persistentDataContainer
             ?.has(nbtKey, PersistentDataType.BYTE) == true
     }
 
     /**
      * 플레이어의 전체 채팅 아이템 개수
      */
-    fun countItems(player: Player): Int {
-        return player.inventory.contents
+    fun countItems(player: Player): Int =
+        player.inventory.contents
             .filterNotNull()
             .filter { isGlobalChatItem(it) }
             .sumOf { it.amount }
-    }
 
     /**
      * 아이템 1개 소비
@@ -76,7 +75,10 @@ class GlobalChatItemManager(
     /**
      * 플레이어에게 아이템 지급
      */
-    fun giveItem(player: Player, amount: Int) {
+    fun giveItem(
+        player: Player,
+        amount: Int,
+    ) {
         val item = createItem(amount)
         val overflow = player.inventory.addItem(item)
 

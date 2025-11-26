@@ -12,7 +12,7 @@ import java.util.concurrent.ConcurrentHashMap
 class WhisperManager(
     private val config: UserChatConfig,
     private val messenger: ChatMessenger,
-    private val userNameProvider: UserNameProvider
+    private val userNameProvider: UserNameProvider,
 ) {
     companion object {
         val NIL_UUID: UUID = UUID.fromString("00000000-0000-0000-0000-000000000000")
@@ -24,13 +24,18 @@ class WhisperManager(
     data class WhisperTarget(
         val uuid: UUID,
         val name: String,
-        val serverId: String?  // null이면 로컬
+        // null이면 로컬
+        val serverId: String?,
     )
 
     /**
      * 귓속말 전송
      */
-    fun sendWhisper(sender: Player, targetName: String, message: String): WhisperResult {
+    fun sendWhisper(
+        sender: Player,
+        targetName: String,
+        message: String,
+    ): WhisperResult {
         // 자기 자신에게 귓속말 방지
         if (targetName.equals(sender.name, ignoreCase = true)) {
             sender.sendMessage(config.getMessage("whisper-self"))
@@ -60,7 +65,11 @@ class WhisperManager(
     /**
      * 로컬 귓속말 전송
      */
-    private fun sendLocalWhisper(sender: Player, target: Player, message: String) {
+    private fun sendLocalWhisper(
+        sender: Player,
+        target: Player,
+        message: String,
+    ) {
         val senderName = userNameProvider.getDisplayName(sender)
         val targetName = userNameProvider.getDisplayName(target)
 
@@ -71,22 +80,28 @@ class WhisperManager(
         target.sendMessage(config.formatWhisperReceived(senderName, message))
 
         // 답장 대상 저장
-        lastWhisperFrom[target.uniqueId] = WhisperTarget(
-            uuid = sender.uniqueId,
-            name = senderName,
-            serverId = null
-        )
-        lastWhisperFrom[sender.uniqueId] = WhisperTarget(
-            uuid = target.uniqueId,
-            name = targetName,
-            serverId = null
-        )
+        lastWhisperFrom[target.uniqueId] =
+            WhisperTarget(
+                uuid = sender.uniqueId,
+                name = senderName,
+                serverId = null,
+            )
+        lastWhisperFrom[sender.uniqueId] =
+            WhisperTarget(
+                uuid = target.uniqueId,
+                name = targetName,
+                serverId = null,
+            )
     }
 
     /**
      * 원격 귓속말 전송
      */
-    private fun sendRemoteWhisper(sender: Player, targetName: String, message: String) {
+    private fun sendRemoteWhisper(
+        sender: Player,
+        targetName: String,
+        message: String,
+    ) {
         val senderName = userNameProvider.getDisplayName(sender)
 
         // 메시지 전송
@@ -94,18 +109,19 @@ class WhisperManager(
             senderUuid = sender.uniqueId,
             senderName = senderName,
             targetName = targetName,
-            message = message
+            message = message,
         )
 
         // 발신자에게 표시 (일단 전송됨으로 표시)
         sender.sendMessage(config.formatWhisperSent(targetName, message))
 
         // 답장 대상 저장 (원격)
-        lastWhisperFrom[sender.uniqueId] = WhisperTarget(
-            uuid = NIL_UUID,
-            name = targetName,
-            serverId = "remote"
-        )
+        lastWhisperFrom[sender.uniqueId] =
+            WhisperTarget(
+                uuid = NIL_UUID,
+                name = targetName,
+                serverId = "remote",
+            )
     }
 
     /**
@@ -116,7 +132,7 @@ class WhisperManager(
         senderName: String,
         senderServerId: String,
         targetName: String,
-        message: String
+        message: String,
     ) {
         val target = Bukkit.getPlayerExact(targetName) ?: return
 
@@ -124,11 +140,12 @@ class WhisperManager(
         target.sendMessage(config.formatWhisperReceived(senderName, message))
 
         // 답장 대상 저장 (원격)
-        lastWhisperFrom[target.uniqueId] = WhisperTarget(
-            uuid = senderUuid,
-            name = senderName,
-            serverId = senderServerId
-        )
+        lastWhisperFrom[target.uniqueId] =
+            WhisperTarget(
+                uuid = senderUuid,
+                name = senderName,
+                serverId = senderServerId,
+            )
 
         // 발신 서버에 전달 완료 알림
         messenger.sendWhisperAck(senderUuid.toString(), true)
@@ -137,7 +154,10 @@ class WhisperManager(
     /**
      * 귓속말 대상을 찾을 수 없을 때 발신자에게 알림
      */
-    fun handleWhisperNotFound(senderUuid: UUID, targetName: String) {
+    fun handleWhisperNotFound(
+        senderUuid: UUID,
+        targetName: String,
+    ) {
         val sender = Bukkit.getPlayer(senderUuid) ?: return
         sender.sendMessage(config.getMessage("player-not-found", "player" to targetName))
     }
@@ -145,7 +165,10 @@ class WhisperManager(
     /**
      * 답장
      */
-    fun reply(sender: Player, message: String): WhisperResult {
+    fun reply(
+        sender: Player,
+        message: String,
+    ): WhisperResult {
         val target = lastWhisperFrom[sender.uniqueId]
 
         if (target == null) {
@@ -182,6 +205,6 @@ class WhisperManager(
         SENT_REMOTE,
         NOT_FOUND,
         NO_TARGET,
-        SELF
+        SELF,
     }
 }

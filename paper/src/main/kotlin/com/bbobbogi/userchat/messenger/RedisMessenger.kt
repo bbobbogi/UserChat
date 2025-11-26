@@ -17,9 +17,8 @@ import java.util.logging.Logger
  */
 class RedisMessenger(
     private val plugin: Plugin,
-    private val logger: Logger
+    private val logger: Logger,
 ) : ChatMessenger {
-
     private var streamBroker: IStreamBroker? = null
 
     private var serverId: String = "unknown"
@@ -30,7 +29,9 @@ class RedisMessenger(
     private var whisperNotFoundHandler: ((UUID, String) -> Unit)? = null
 
     override fun getMode(): MessagingMode = MessagingMode.REDIS
+
     override fun getServerId(): String = serverId
+
     override fun getServerDisplayName(): String = serverDisplayName
 
     override fun initialize() {
@@ -68,7 +69,7 @@ class RedisMessenger(
         broker.consumeStream(
             ChannelConstants.REDIS_GLOBAL_CHAT_STREAM,
             ChannelConstants.REDIS_CONSUMER_GROUP,
-            serverId
+            serverId,
         ) { msg ->
             try {
                 val data = msg.data
@@ -79,18 +80,22 @@ class RedisMessenger(
                 val messageServerId = data["serverId"] ?: return@consumeStream
                 if (messageServerId == serverId) return@consumeStream
 
-                val message = GlobalChatMessage(
-                    serverId = messageServerId,
-                    serverDisplayName = data["serverDisplayName"] ?: "Server",
-                    playerUuid = data["playerUuid"] ?: return@consumeStream,
-                    playerName = data["playerName"] ?: "Unknown",
-                    message = data["message"] ?: return@consumeStream,
-                    timestamp = data["timestamp"]?.toLongOrNull() ?: System.currentTimeMillis()
-                )
+                val message =
+                    GlobalChatMessage(
+                        serverId = messageServerId,
+                        serverDisplayName = data["serverDisplayName"] ?: "Server",
+                        playerUuid = data["playerUuid"] ?: return@consumeStream,
+                        playerName = data["playerName"] ?: "Unknown",
+                        message = data["message"] ?: return@consumeStream,
+                        timestamp = data["timestamp"]?.toLongOrNull() ?: System.currentTimeMillis(),
+                    )
 
-                Bukkit.getScheduler().runTask(plugin, Runnable {
-                    globalChatHandler?.invoke(message)
-                })
+                Bukkit.getScheduler().runTask(
+                    plugin,
+                    Runnable {
+                        globalChatHandler?.invoke(message)
+                    },
+                )
             } catch (e: Exception) {
                 logger.warning("[UserChat] 전체 채팅 메시지 처리 실패: ${e.message}")
             }
@@ -100,7 +105,7 @@ class RedisMessenger(
         broker.consumeStream(
             ChannelConstants.REDIS_WHISPER_STREAM,
             ChannelConstants.REDIS_CONSUMER_GROUP,
-            serverId
+            serverId,
         ) { msg ->
             try {
                 val data = msg.data
@@ -108,26 +113,33 @@ class RedisMessenger(
 
                 when (type) {
                     MessageType.WHISPER.name -> {
-                        val message = WhisperMessage(
-                            senderUuid = data["senderUuid"] ?: return@consumeStream,
-                            senderName = data["senderName"] ?: "Unknown",
-                            senderServerId = data["senderServerId"] ?: return@consumeStream,
-                            targetName = data["targetName"] ?: return@consumeStream,
-                            message = data["message"] ?: return@consumeStream,
-                            timestamp = data["timestamp"]?.toLongOrNull() ?: System.currentTimeMillis()
-                        )
+                        val message =
+                            WhisperMessage(
+                                senderUuid = data["senderUuid"] ?: return@consumeStream,
+                                senderName = data["senderName"] ?: "Unknown",
+                                senderServerId = data["senderServerId"] ?: return@consumeStream,
+                                targetName = data["targetName"] ?: return@consumeStream,
+                                message = data["message"] ?: return@consumeStream,
+                                timestamp = data["timestamp"]?.toLongOrNull() ?: System.currentTimeMillis(),
+                            )
 
-                        Bukkit.getScheduler().runTask(plugin, Runnable {
-                            whisperHandler?.invoke(message)
-                        })
+                        Bukkit.getScheduler().runTask(
+                            plugin,
+                            Runnable {
+                                whisperHandler?.invoke(message)
+                            },
+                        )
                     }
                     MessageType.WHISPER_NOT_FOUND.name -> {
                         val senderUuid = data["senderUuid"] ?: return@consumeStream
                         val targetName = data["targetName"] ?: return@consumeStream
 
-                        Bukkit.getScheduler().runTask(plugin, Runnable {
-                            whisperNotFoundHandler?.invoke(UUID.fromString(senderUuid), targetName)
-                        })
+                        Bukkit.getScheduler().runTask(
+                            plugin,
+                            Runnable {
+                                whisperNotFoundHandler?.invoke(UUID.fromString(senderUuid), targetName)
+                            },
+                        )
                     }
                 }
             } catch (e: Exception) {
@@ -140,19 +152,24 @@ class RedisMessenger(
         streamBroker?.stopAllConsuming()
     }
 
-    override fun broadcastGlobalChat(playerUuid: UUID, playerName: String, message: String) {
+    override fun broadcastGlobalChat(
+        playerUuid: UUID,
+        playerName: String,
+        message: String,
+    ) {
         val broker = streamBroker ?: return
 
         try {
-            val data = mapOf(
-                "type" to MessageType.GLOBAL_CHAT.name,
-                "serverId" to serverId,
-                "serverDisplayName" to serverDisplayName,
-                "playerUuid" to playerUuid.toString(),
-                "playerName" to playerName,
-                "message" to message,
-                "timestamp" to System.currentTimeMillis().toString()
-            )
+            val data =
+                mapOf(
+                    "type" to MessageType.GLOBAL_CHAT.name,
+                    "serverId" to serverId,
+                    "serverDisplayName" to serverDisplayName,
+                    "playerUuid" to playerUuid.toString(),
+                    "playerName" to playerName,
+                    "message" to message,
+                    "timestamp" to System.currentTimeMillis().toString(),
+                )
 
             broker.publishStream(ChannelConstants.REDIS_GLOBAL_CHAT_STREAM, data)
         } catch (e: Exception) {
@@ -164,19 +181,25 @@ class RedisMessenger(
         globalChatHandler = handler
     }
 
-    override fun sendWhisper(senderUuid: UUID, senderName: String, targetName: String, message: String) {
+    override fun sendWhisper(
+        senderUuid: UUID,
+        senderName: String,
+        targetName: String,
+        message: String,
+    ) {
         val broker = streamBroker ?: return
 
         try {
-            val data = mapOf(
-                "type" to MessageType.WHISPER.name,
-                "senderUuid" to senderUuid.toString(),
-                "senderName" to senderName,
-                "senderServerId" to serverId,
-                "targetName" to targetName,
-                "message" to message,
-                "timestamp" to System.currentTimeMillis().toString()
-            )
+            val data =
+                mapOf(
+                    "type" to MessageType.WHISPER.name,
+                    "senderUuid" to senderUuid.toString(),
+                    "senderName" to senderName,
+                    "senderServerId" to serverId,
+                    "targetName" to targetName,
+                    "message" to message,
+                    "timestamp" to System.currentTimeMillis().toString(),
+                )
 
             broker.publishStream(ChannelConstants.REDIS_WHISPER_STREAM, data)
         } catch (e: Exception) {
@@ -184,7 +207,10 @@ class RedisMessenger(
         }
     }
 
-    override fun sendWhisperAck(senderUuid: String, success: Boolean) {
+    override fun sendWhisperAck(
+        senderUuid: String,
+        success: Boolean,
+    ) {
         // Redis에서는 별도 ACK 불필요
     }
 

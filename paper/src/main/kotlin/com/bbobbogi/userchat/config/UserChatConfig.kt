@@ -5,10 +5,11 @@ import com.bbobbogi.userchat.common.model.MessagingMode
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.minimessage.MiniMessage
 import org.bukkit.Material
-import org.bukkit.configuration.file.FileConfiguration
 import org.bukkit.plugin.Plugin
 
-class UserChatConfig(private val plugin: Plugin) {
+class UserChatConfig(
+    private val plugin: Plugin,
+) {
     private val miniMessage = MiniMessage.miniMessage()
 
     // Messaging
@@ -64,9 +65,10 @@ class UserChatConfig(private val plugin: Plugin) {
         // Messages
         val messagesSection = config.getConfigurationSection("messages")
         if (messagesSection != null) {
-            messages = messagesSection.getKeys(false).associateWith { key ->
-                messagesSection.getString(key, "") ?: ""
-            }
+            messages =
+                messagesSection.getKeys(false).associateWith { key ->
+                    messagesSection.getString(key, "") ?: ""
+                }
         }
     }
 
@@ -86,7 +88,10 @@ class UserChatConfig(private val plugin: Plugin) {
     }
 
     // Message helpers
-    fun getMessage(key: String, vararg replacements: Pair<String, String>): Component {
+    fun getMessage(
+        key: String,
+        vararg replacements: Pair<String, String>,
+    ): Component {
         var message = messages[key] ?: return Component.text("Missing message: $key")
 
         for ((placeholder, value) in replacements) {
@@ -96,47 +101,57 @@ class UserChatConfig(private val plugin: Plugin) {
         return miniMessage.deserialize(message)
     }
 
-    fun getMessageRaw(key: String): String {
-        return messages[key] ?: ""
-    }
+    fun getMessageRaw(key: String): String = messages[key] ?: ""
 
-    fun getItemDisplayNameComponent(): Component {
-        return miniMessage.deserialize(itemDisplayName)
-    }
+    fun getItemDisplayNameComponent(): Component = miniMessage.deserialize(itemDisplayName)
 
-    fun getItemLoreComponents(): List<Component> {
-        return itemLore.map { miniMessage.deserialize(it) }
-    }
+    fun getItemLoreComponents(): List<Component> = itemLore.map { miniMessage.deserialize(it) }
 
-    fun formatDistanceChat(playerName: String, message: String): Component {
-        val format = messages["distance-format"]
-            ?: "<gray>[근처]</gray> <white>%player%</white>: %message%"
+    fun formatDistanceChat(
+        playerName: String,
+        message: String,
+    ): Component {
+        val format =
+            messages["distance-format"]
+                ?: "<gray>[근처]</gray> <white>%player%</white>: %message%"
         return miniMessage.deserialize(
-            format.replace("%player%", playerName).replace("%message%", message)
+            format.replace("%player%", playerName).replace("%message%", message),
         )
     }
 
-    fun formatGlobalChat(serverName: String, playerName: String, message: String): Component {
-        val format = messages["global-format"]
-            ?: "<gold>[전체]</gold> <gray>[%server%]</gray> <white>%player%</white>: %message%"
+    fun formatGlobalChat(
+        serverName: String,
+        playerName: String,
+        message: String,
+    ): Component {
+        val format =
+            messages["global-format"]
+                ?: "<gold>[전체]</gold> <gray>[%server%]</gray> <white>%player%</white>: %message%"
         return miniMessage.deserialize(
-            format.replace("%server%", serverName)
+            format
+                .replace("%server%", serverName)
                 .replace("%player%", playerName)
-                .replace("%message%", message)
+                .replace("%message%", message),
         )
     }
 
-    fun formatWhisperSent(targetName: String, message: String): Component {
+    fun formatWhisperSent(
+        targetName: String,
+        message: String,
+    ): Component {
         val format = messages["whisper-sent"] ?: "<gray>[나 → %target%] %message%</gray>"
         return miniMessage.deserialize(
-            format.replace("%target%", targetName).replace("%message%", message)
+            format.replace("%target%", targetName).replace("%message%", message),
         )
     }
 
-    fun formatWhisperReceived(senderName: String, message: String): Component {
+    fun formatWhisperReceived(
+        senderName: String,
+        message: String,
+    ): Component {
         val format = messages["whisper-received"] ?: "<gray>[%sender% → 나] %message%</gray>"
         return miniMessage.deserialize(
-            format.replace("%sender%", senderName).replace("%message%", message)
+            format.replace("%sender%", senderName).replace("%message%", message),
         )
     }
 }

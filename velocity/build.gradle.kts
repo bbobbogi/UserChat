@@ -40,7 +40,6 @@ tasks {
         useJUnitPlatform()
     }
 
-
     build {
         dependsOn(shadowJar)
     }

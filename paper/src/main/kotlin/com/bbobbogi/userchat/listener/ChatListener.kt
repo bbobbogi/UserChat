@@ -15,9 +15,8 @@ class ChatListener(
     private val config: UserChatConfig,
     private val modeManager: ChatModeManager,
     private val distanceChatHandler: DistanceChatHandler,
-    private val globalChatHandler: GlobalChatHandler
+    private val globalChatHandler: GlobalChatHandler,
 ) : Listener {
-
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     fun onChat(event: AsyncChatEvent) {
         val player = event.player

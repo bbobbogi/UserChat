@@ -10,19 +10,38 @@ import java.util.UUID
  */
 interface ChatMessenger {
     fun getMode(): MessagingMode
+
     fun getServerId(): String
+
     fun getServerDisplayName(): String
 
     fun initialize()
+
     fun shutdown()
 
     // 전체 채팅
-    fun broadcastGlobalChat(playerUuid: UUID, playerName: String, message: String)
+    fun broadcastGlobalChat(
+        playerUuid: UUID,
+        playerName: String,
+        message: String,
+    )
+
     fun setGlobalChatHandler(handler: (GlobalChatMessage) -> Unit)
 
     // 귓속말
-    fun sendWhisper(senderUuid: UUID, senderName: String, targetName: String, message: String)
-    fun sendWhisperAck(senderUuid: String, success: Boolean)
+    fun sendWhisper(
+        senderUuid: UUID,
+        senderName: String,
+        targetName: String,
+        message: String,
+    )
+
+    fun sendWhisperAck(
+        senderUuid: String,
+        success: Boolean,
+    )
+
     fun setWhisperHandler(handler: (WhisperMessage) -> Unit)
+
     fun setWhisperNotFoundHandler(handler: (UUID, String) -> Unit)
 }
