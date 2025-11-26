@@ -18,8 +18,8 @@ velocityPluginJson {
 
 dependencies {
     implementation(project(":common"))
-    compileOnly(libs.kotlin.stdlib)
-    compileOnly(libs.kotlinx.serialization.json)
+    implementation(libs.kotlin.stdlib)
+    implementation(libs.kotlinx.serialization.json)
 
     // Velocity API
     compileOnly(libs.velocity.api)

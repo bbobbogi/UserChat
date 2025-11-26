@@ -18,6 +18,21 @@ bukkitPluginYaml {
 
     softDepend.add("ChzzkMultipleUser")
 
+    libraries.addAll(
+        libs.kotlin.stdlib
+            .get()
+            .toString(),
+        libs.kotlinx.serialization.json
+            .get()
+            .toString(),
+        libs.exposed.core
+            .get()
+            .toString(),
+        libs.exposed.dao
+            .get()
+            .toString(),
+    )
+
     commands {
         register("유저채팅") {
             description = "유저 채팅 관리"
