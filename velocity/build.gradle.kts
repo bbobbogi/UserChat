@@ -18,6 +18,8 @@ velocityPluginJson {
 
 dependencies {
     implementation(project(":common"))
+    compileOnly(libs.kotlin.stdlib)
+    compileOnly(libs.kotlinx.serialization.json)
 
     // Velocity API
     compileOnly(libs.velocity.api)
@@ -38,9 +40,6 @@ tasks {
         useJUnitPlatform()
     }
 
-    shadowJar {
-        relocate("kotlinx.serialization", "com.bbobbogi.userchat.libs.kotlinx.serialization")
-    }
 
     build {
         dependsOn(shadowJar)
