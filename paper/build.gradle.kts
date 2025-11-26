@@ -14,25 +14,26 @@ bukkitPluginYaml {
     version = project.version.toString()
     main = "com.bbobbogi.userchat.UserChatPlugin"
     apiVersion = "1.20"
-    authors = listOf("bbobbogi")
     description = "거리 기반 채팅, 전체 채팅, 귓속말 시스템"
-    softDepend = listOf("ChzzkMultipleUser")
+    authors.add("bbobbogi")
+
+    softDepend.add("ChzzkMultipleUser")
 
     commands {
         register("유저채팅") {
-            aliases = listOf("userchat", "uc")
             description = "유저 채팅 관리"
             permission = "userchat.use"
+            aliases.addAll("userchat", "uc")
         }
         register("귓속말") {
-            aliases = listOf("귓", "w", "whisper")
             description = "귓속말 전송"
             permission = "userchat.whisper"
+            aliases.addAll("귓", "w", "whisper")
         }
         register("답장") {
-            aliases = listOf("답", "r", "reply")
             description = "마지막 귓속말 상대에게 답장"
             permission = "userchat.whisper"
+            aliases.addAll("답", "r", "reply")
         }
     }
 
@@ -65,13 +66,12 @@ dependencies {
 
     // Paper API
     compileOnly(libs.paper.api)
-    implementation(libs.kotlin.stdlib)
-    implementation(libs.kotlinx.serialization.json)
 
     // ChzzkMultipleUser modules
     compileOnly(libs.chzzk.common)
     compileOnly(libs.chzzk.database)
     compileOnly(libs.chzzk.feature.integration)
+    compileOnly(libs.chzzk.messaging)
 
     // Exposed (for table definitions)
     compileOnly(libs.exposed.core)
