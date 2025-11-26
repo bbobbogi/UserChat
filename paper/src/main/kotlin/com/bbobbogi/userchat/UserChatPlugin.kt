@@ -19,7 +19,9 @@ import com.bbobbogi.userchat.messenger.PluginMessageMessenger
 import com.bbobbogi.userchat.messenger.RedisMessenger
 import com.bbobbogi.userchat.service.UserNameProvider
 import com.bbobbogi.userchat.whisper.WhisperManager
+import io.papermc.chzzkmultipleuser.messaging.MessagingProvider
 import org.bukkit.plugin.java.JavaPlugin
+import java.util.UUID
 
 class UserChatPlugin : JavaPlugin() {
 
@@ -97,20 +99,24 @@ class UserChatPlugin : JavaPlugin() {
 
     private fun getServerId(): String? {
         return try {
-            val providerClass = Class.forName("io.papermc.chzzkmultipleuser.messaging.MessagingProvider")
-            val method = providerClass.getMethod("getServerId")
-            method.invoke(null) as? String
-        } catch (e: Exception) {
+            if (MessagingProvider.isInitialized()) {
+                MessagingProvider.getServerId()
+            } else {
+                null
+            }
+        } catch (e: NoClassDefFoundError) {
             null
         }
     }
 
     private fun getServerName(): String {
         return try {
-            val providerClass = Class.forName("io.papermc.chzzkmultipleuser.messaging.MessagingProvider")
-            val method = providerClass.getMethod("getServerDisplayName")
-            (method.invoke(null) as? String) ?: "Server"
-        } catch (e: Exception) {
+            if (MessagingProvider.isInitialized()) {
+                MessagingProvider.getServerDisplayName() ?: "Server"
+            } else {
+                "Server"
+            }
+        } catch (e: NoClassDefFoundError) {
             "Server"
         }
     }
@@ -129,7 +135,7 @@ class UserChatPlugin : JavaPlugin() {
         // 귓속말 수신 핸들러
         messenger.setWhisperHandler { message ->
             whisperManager.handleRemoteWhisper(
-                senderUuid = java.util.UUID.fromString(message.senderUuid),
+                senderUuid = UUID.fromString(message.senderUuid),
                 senderName = message.senderName,
                 senderServerId = message.senderServerId,
                 targetName = message.targetName,

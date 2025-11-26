@@ -1,5 +1,6 @@
 package com.bbobbogi.userchat.service
 
+import io.papermc.chzzkmultipleuser.feature.user.UserService
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 import org.bukkit.plugin.Plugin
@@ -13,25 +14,21 @@ class UserNameProvider(
     private val plugin: Plugin,
     private val logger: Logger
 ) {
-    private var userService: Any? = null
-    private var getDisplayNameMethod: java.lang.reflect.Method? = null
+    private var userService: UserService? = null
 
     fun initialize(): Boolean {
         return try {
-            // ChzzkMultipleUser의 UserService 가져오기
-            val userServiceClass = Class.forName("io.papermc.chzzkmultipleuser.feature.user.UserService")
-            val registration = Bukkit.getServicesManager().getRegistration(userServiceClass)
+            val registration = Bukkit.getServicesManager().getRegistration(UserService::class.java)
 
             if (registration != null) {
                 userService = registration.provider
-                getDisplayNameMethod = userServiceClass.getMethod("getDisplayName", Player::class.java)
                 logger.info("[UserChat] ChzzkMultipleUser UserService 연동 완료")
                 true
             } else {
                 logger.info("[UserChat] ChzzkMultipleUser UserService를 찾을 수 없습니다. 기본 이름을 사용합니다.")
                 false
             }
-        } catch (e: ClassNotFoundException) {
+        } catch (e: NoClassDefFoundError) {
             logger.info("[UserChat] ChzzkMultipleUser가 설치되지 않았습니다. 기본 이름을 사용합니다.")
             false
         } catch (e: Exception) {
@@ -45,11 +42,7 @@ class UserNameProvider(
      */
     fun getDisplayName(player: Player): String {
         return try {
-            if (userService != null && getDisplayNameMethod != null) {
-                getDisplayNameMethod!!.invoke(userService, player) as String
-            } else {
-                player.name
-            }
+            userService?.getDisplayName(player) ?: player.name
         } catch (e: Exception) {
             logger.warning("[UserChat] 닉네임 가져오기 실패: ${e.message}")
             player.name
