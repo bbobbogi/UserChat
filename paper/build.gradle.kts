@@ -63,6 +63,8 @@ bukkitPluginYaml {
 
 dependencies {
     implementation(project(":common"))
+    compileOnly(libs.kotlin.stdlib)
+    compileOnly(libs.kotlinx.serialization.json)
 
     // Paper API
     compileOnly(libs.paper.api)
@@ -100,9 +102,6 @@ tasks {
         useJUnitPlatform()
     }
 
-    shadowJar {
-        relocate("kotlinx.serialization", "com.bbobbogi.userchat.libs.kotlinx.serialization")
-    }
 
     build {
         dependsOn(shadowJar)
