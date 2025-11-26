@@ -62,7 +62,11 @@ class GlobalChatItemManager(
     fun consumeItem(player: Player): Boolean {
         for (item in player.inventory.contents) {
             if (item != null && isGlobalChatItem(item)) {
-                item.amount -= 1
+                if (item.amount > 1) {
+                    item.amount -= 1
+                } else {
+                    player.inventory.remove(item)
+                }
                 return true
             }
         }
