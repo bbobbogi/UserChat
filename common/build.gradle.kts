@@ -1,11 +1,12 @@
 plugins {
+    `java-library`
     alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.kotlin.serialization)
 }
 
 dependencies {
-    implementation(libs.kotlin.stdlib)
-    implementation(libs.kotlinx.serialization.json)
+    api(libs.kotlin.stdlib)
+    api(libs.kotlinx.serialization.json)
 }
 
 val targetJavaVersion = 21
