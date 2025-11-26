@@ -11,10 +11,15 @@ import org.bukkit.entity.Player
 
 class WhisperCommand(
     private val config: UserChatConfig,
-    private val whisperManager: WhisperManager
-) : CommandExecutor, TabCompleter {
-
-    override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
+    private val whisperManager: WhisperManager,
+) : CommandExecutor,
+    TabCompleter {
+    override fun onCommand(
+        sender: CommandSender,
+        command: Command,
+        label: String,
+        args: Array<out String>,
+    ): Boolean {
         if (sender !is Player) {
             sender.sendMessage(config.getMessage("player-only"))
             return true
@@ -41,10 +46,11 @@ class WhisperCommand(
         sender: CommandSender,
         command: Command,
         alias: String,
-        args: Array<out String>
+        args: Array<out String>,
     ): List<String> {
         if (args.size == 1) {
-            return Bukkit.getOnlinePlayers()
+            return Bukkit
+                .getOnlinePlayers()
                 .map { it.name }
                 .filter { it.lowercase().startsWith(args[0].lowercase()) }
         }

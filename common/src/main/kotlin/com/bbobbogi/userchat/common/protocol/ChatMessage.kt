@@ -10,7 +10,7 @@ data class GlobalChatMessage(
     val playerUuid: String,
     val playerName: String,
     val message: String,
-    val timestamp: Long = System.currentTimeMillis()
+    val timestamp: Long = System.currentTimeMillis(),
 )
 
 @Serializable
@@ -21,7 +21,7 @@ data class WhisperMessage(
     val senderServerId: String,
     val targetName: String,
     val message: String,
-    val timestamp: Long = System.currentTimeMillis()
+    val timestamp: Long = System.currentTimeMillis(),
 )
 
 @Serializable
@@ -29,12 +29,12 @@ data class WhisperAckMessage(
     val type: String = MessageType.WHISPER_ACK.name,
     val targetUuid: String,
     val success: Boolean,
-    val targetServerId: String? = null
+    val targetServerId: String? = null,
 )
 
 @Serializable
 data class WhisperNotFoundMessage(
     val type: String = MessageType.WHISPER_NOT_FOUND.name,
     val senderUuid: String,
-    val targetName: String
+    val targetName: String,
 )

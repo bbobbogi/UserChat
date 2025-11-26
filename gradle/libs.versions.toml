@@ -12,6 +12,7 @@ essentialsx = "2.20.1"
 placeholderapi = "2.11.5"
 mockk = "1.13.9"
 junit = "5.10.1"
+ktlint = "14.0.1"
 
 [libraries]
 # Paper API
@@ -49,3 +50,4 @@ shadow = { id = "com.gradleup.shadow", version.ref = "shadow" }
 run-paper = { id = "xyz.jpenilla.run-paper", version.ref = "run-paper" }
 resource-factory = { id = "xyz.jpenilla.resource-factory-bukkit-convention", version.ref = "resource-factory" }
 resource-factory-velocity = { id = "xyz.jpenilla.resource-factory-velocity-convention", version.ref = "resource-factory" }
+ktlint = { id = "org.jlleitschuh.gradle.ktlint", version.ref = "ktlint" }

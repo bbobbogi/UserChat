@@ -24,7 +24,6 @@ import org.bukkit.plugin.java.JavaPlugin
 import java.util.UUID
 
 class UserChatPlugin : JavaPlugin() {
-
     lateinit var config: UserChatConfig
         private set
 
@@ -81,8 +80,8 @@ class UserChatPlugin : JavaPlugin() {
         logger.info("[UserChat] 플러그인이 비활성화되었습니다.")
     }
 
-    private fun createMessenger(): ChatMessenger {
-        return when (config.messagingMode) {
+    private fun createMessenger(): ChatMessenger =
+        when (config.messagingMode) {
             MessagingMode.OFF -> {
                 NoOpMessenger(getServerName())
             }
@@ -95,10 +94,9 @@ class UserChatPlugin : JavaPlugin() {
                 RedisMessenger(this, logger)
             }
         }
-    }
 
-    private fun getServerId(): String? {
-        return try {
+    private fun getServerId(): String? =
+        try {
             if (MessagingProvider.isInitialized()) {
                 MessagingProvider.getServerId()
             } else {
@@ -107,10 +105,9 @@ class UserChatPlugin : JavaPlugin() {
         } catch (e: NoClassDefFoundError) {
             null
         }
-    }
 
-    private fun getServerName(): String {
-        return try {
+    private fun getServerName(): String =
+        try {
             if (MessagingProvider.isInitialized()) {
                 MessagingProvider.getServerDisplayName() ?: "Server"
             } else {
@@ -119,7 +116,6 @@ class UserChatPlugin : JavaPlugin() {
         } catch (e: NoClassDefFoundError) {
             "Server"
         }
-    }
 
     private fun setupMessagingHandlers() {
         // 전체 채팅 수신 핸들러
@@ -128,7 +124,7 @@ class UserChatPlugin : JavaPlugin() {
                 serverId = message.serverId,
                 serverDisplayName = message.serverDisplayName,
                 playerName = message.playerName,
-                message = message.message
+                message = message.message,
             )
         }
 
@@ -139,7 +135,7 @@ class UserChatPlugin : JavaPlugin() {
                 senderName = message.senderName,
                 senderServerId = message.senderServerId,
                 targetName = message.targetName,
-                message = message.message
+                message = message.message,
             )
         }
 
@@ -171,17 +167,17 @@ class UserChatPlugin : JavaPlugin() {
 
         pluginManager.registerEvents(
             ChatListener(config, modeManager, distanceChatHandler, globalChatHandler),
-            this
+            this,
         )
 
         pluginManager.registerEvents(
             ItemInteractListener(config, itemManager, modeManager),
-            this
+            this,
         )
 
         pluginManager.registerEvents(
             PlayerConnectionListener(modeManager, whisperManager),
-            this
+            this,
         )
 
         pluginManager.registerEvents(settingsGui, this)

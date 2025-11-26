@@ -26,9 +26,9 @@ class PluginMessageMessenger(
     private val plugin: Plugin,
     private val serverId: String,
     private val serverDisplayName: String,
-    private val logger: Logger
-) : ChatMessenger, PluginMessageListener {
-
+    private val logger: Logger,
+) : ChatMessenger,
+    PluginMessageListener {
     private val json = Json { ignoreUnknownKeys = true }
 
     private var globalChatHandler: ((GlobalChatMessage) -> Unit)? = null
@@ -37,7 +37,9 @@ class PluginMessageMessenger(
     private var lastNoPlayerLogTime = 0L
 
     override fun getMode(): MessagingMode = MessagingMode.PLUGIN_MESSAGE
+
     override fun getServerId(): String = serverId
+
     override fun getServerDisplayName(): String = serverDisplayName
 
     override fun initialize() {
@@ -51,14 +53,19 @@ class PluginMessageMessenger(
         Bukkit.getMessenger().unregisterIncomingPluginChannel(plugin, ChannelConstants.PLUGIN_MESSAGE_CHANNEL, this)
     }
 
-    override fun broadcastGlobalChat(playerUuid: UUID, playerName: String, message: String) {
-        val chatMessage = GlobalChatMessage(
-            serverId = serverId,
-            serverDisplayName = serverDisplayName,
-            playerUuid = playerUuid.toString(),
-            playerName = playerName,
-            message = message
-        )
+    override fun broadcastGlobalChat(
+        playerUuid: UUID,
+        playerName: String,
+        message: String,
+    ) {
+        val chatMessage =
+            GlobalChatMessage(
+                serverId = serverId,
+                serverDisplayName = serverDisplayName,
+                playerUuid = playerUuid.toString(),
+                playerName = playerName,
+                message = message,
+            )
 
         val data = encodeMessage(MessageType.GLOBAL_CHAT.name, json.encodeToString(chatMessage))
         sendPluginMessage(data)
@@ -68,20 +75,29 @@ class PluginMessageMessenger(
         globalChatHandler = handler
     }
 
-    override fun sendWhisper(senderUuid: UUID, senderName: String, targetName: String, message: String) {
-        val whisperMessage = WhisperMessage(
-            senderUuid = senderUuid.toString(),
-            senderName = senderName,
-            senderServerId = serverId,
-            targetName = targetName,
-            message = message
-        )
+    override fun sendWhisper(
+        senderUuid: UUID,
+        senderName: String,
+        targetName: String,
+        message: String,
+    ) {
+        val whisperMessage =
+            WhisperMessage(
+                senderUuid = senderUuid.toString(),
+                senderName = senderName,
+                senderServerId = serverId,
+                targetName = targetName,
+                message = message,
+            )
 
         val data = encodeMessage(MessageType.WHISPER.name, json.encodeToString(whisperMessage))
         sendPluginMessage(data)
     }
 
-    override fun sendWhisperAck(senderUuid: String, success: Boolean) {
+    override fun sendWhisperAck(
+        senderUuid: String,
+        success: Boolean,
+    ) {
         // Velocity에서 처리
     }
 
@@ -93,7 +109,11 @@ class PluginMessageMessenger(
         whisperNotFoundHandler = handler
     }
 
-    override fun onPluginMessageReceived(channel: String, player: Player, data: ByteArray) {
+    override fun onPluginMessageReceived(
+        channel: String,
+        player: Player,
+        data: ByteArray,
+    ) {
         if (channel != ChannelConstants.PLUGIN_MESSAGE_CHANNEL) return
 
         try {
@@ -121,7 +141,10 @@ class PluginMessageMessenger(
         }
     }
 
-    private fun encodeMessage(type: String, payload: String): ByteArray {
+    private fun encodeMessage(
+        type: String,
+        payload: String,
+    ): ByteArray {
         val baos = ByteArrayOutputStream()
         val dos = DataOutputStream(baos)
         dos.writeUTF(type)

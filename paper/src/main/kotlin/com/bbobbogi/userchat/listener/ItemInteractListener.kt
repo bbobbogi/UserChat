@@ -15,9 +15,8 @@ import java.time.Duration
 class ItemInteractListener(
     private val config: UserChatConfig,
     private val itemManager: GlobalChatItemManager,
-    private val modeManager: ChatModeManager
+    private val modeManager: ChatModeManager,
 ) : Listener {
-
     @EventHandler
     fun onPlayerInteract(event: PlayerInteractEvent) {
         // 우클릭만 처리
@@ -49,9 +48,9 @@ class ItemInteractListener(
                     Title.Times.times(
                         Duration.ofMillis(500),
                         Duration.ofSeconds(3),
-                        Duration.ofMillis(500)
-                    )
-                )
+                        Duration.ofMillis(500),
+                    ),
+                ),
             )
 
             player.sendMessage(config.getMessage("global-mode-activated"))

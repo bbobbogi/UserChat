@@ -8,23 +8,27 @@ plugins {
     alias(libs.plugins.run.paper) apply false
     alias(libs.plugins.resource.factory) apply false
     alias(libs.plugins.resource.factory.velocity) apply false
+    alias(libs.plugins.ktlint)
 }
 
 // GitHub Packages 인증 정보 (local.properties 또는 환경변수에서 읽기)
-val localProperties = Properties().apply {
-    val localPropertiesFile = rootProject.file("local.properties")
-    if (localPropertiesFile.exists()) {
-        load(localPropertiesFile.inputStream())
+val localProperties =
+    Properties().apply {
+        val localPropertiesFile = rootProject.file("local.properties")
+        if (localPropertiesFile.exists()) {
+            load(localPropertiesFile.inputStream())
+        }
     }
-}
 
-val gprUser: String? = localProperties.getProperty("gpr.user")
-    ?: (findProperty("gpr.user") as? String)
-    ?: System.getenv("GITHUB_ACTOR")
+val gprUser: String? =
+    localProperties.getProperty("gpr.user")
+        ?: (findProperty("gpr.user") as? String)
+        ?: System.getenv("GITHUB_ACTOR")
 
-val gprToken: String? = localProperties.getProperty("gpr.token")
-    ?: (findProperty("gpr.token") as? String)
-    ?: System.getenv("GITHUB_TOKEN")
+val gprToken: String? =
+    localProperties.getProperty("gpr.token")
+        ?: (findProperty("gpr.token") as? String)
+        ?: System.getenv("GITHUB_TOKEN")
 
 // 하위 프로젝트에서 사용할 수 있도록 ext에 저장
 extra["gprUser"] = gprUser
@@ -34,11 +38,14 @@ allprojects {
     group = "com.bbobbogi"
     version = findProperty("version")?.toString()?.takeIf { it != "unspecified" }
         ?: "0.0.1-SNAPSHOT"
+
+    repositories {
+        mavenCentral()
+    }
 }
 
 subprojects {
     repositories {
-        mavenCentral()
         maven("https://repo.papermc.io/repository/maven-public/") {
             name = "papermc-repo"
             content {
@@ -85,5 +92,7 @@ subprojects {
                 jvmTarget.set(JvmTarget.fromTarget(targetJavaVersion.toString()))
             }
         }
+
+        apply(plugin = "org.jlleitschuh.gradle.ktlint")
     }
 }

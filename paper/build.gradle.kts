@@ -1,4 +1,3 @@
-import xyz.jpenilla.resourcefactory.bukkit.BukkitPluginYaml
 import xyz.jpenilla.resourcefactory.bukkit.Permission
 
 plugins {
@@ -101,7 +100,6 @@ tasks {
     test {
         useJUnitPlatform()
     }
-
 
     build {
         dependsOn(shadowJar)

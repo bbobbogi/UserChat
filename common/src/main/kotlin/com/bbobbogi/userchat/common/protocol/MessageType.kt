@@ -4,5 +4,5 @@ enum class MessageType {
     GLOBAL_CHAT,
     WHISPER,
     WHISPER_ACK,
-    WHISPER_NOT_FOUND
+    WHISPER_NOT_FOUND,
 }
