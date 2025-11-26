@@ -18,20 +18,20 @@ bukkitPluginYaml {
 
     softDepend.add("ChzzkMultipleUser")
 
-    libraries.addAll(
-        libs.kotlin.stdlib
-            .get()
-            .toString(),
-        libs.kotlinx.serialization.json
-            .get()
-            .toString(),
-        libs.exposed.core
-            .get()
-            .toString(),
-        libs.exposed.dao
-            .get()
-            .toString(),
-    )
+    // libraries.addAll(
+    //     libs.kotlin.stdlib
+    //         .get()
+    //         .toString(),
+    //     libs.kotlinx.serialization.json
+    //         .get()
+    //         .toString(),
+    //     libs.exposed.core
+    //         .get()
+    //         .toString(),
+    //     libs.exposed.dao
+    //         .get()
+    //         .toString(),
+    // )
 
     commands {
         register("유저채팅") {
@@ -84,6 +84,7 @@ dependencies {
     compileOnly(libs.paper.api)
 
     // ChzzkMultipleUser modules
+    compileOnly(libs.chzzk.core)
     compileOnly(libs.chzzk.common)
     compileOnly(libs.chzzk.database)
     compileOnly(libs.chzzk.feature.integration)

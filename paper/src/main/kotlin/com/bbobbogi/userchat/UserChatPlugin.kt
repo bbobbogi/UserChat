@@ -152,7 +152,7 @@ class UserChatPlugin : JavaPlugin() {
             tabCompleter = userChatCommand
         }
 
-        val whisperCommand = WhisperCommand(config, whisperManager)
+        val whisperCommand = WhisperCommand(config, whisperManager, userNameProvider)
         getCommand("귓속말")?.apply {
             setExecutor(whisperCommand)
             tabCompleter = whisperCommand
