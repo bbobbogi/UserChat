@@ -7,6 +7,7 @@ plugins {
     alias(libs.plugins.shadow) apply false
     alias(libs.plugins.run.paper) apply false
     alias(libs.plugins.resource.factory) apply false
+    alias(libs.plugins.resource.factory.velocity) apply false
 }
 
 // GitHub Packages 인증 정보 (local.properties 또는 환경변수에서 읽기)
