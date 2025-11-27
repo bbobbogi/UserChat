@@ -4,6 +4,7 @@ import com.bbobbogi.userchat.common.model.MessagingMode
 import com.bbobbogi.userchat.common.protocol.ChannelConstants
 import com.bbobbogi.userchat.common.protocol.GlobalChatMessage
 import com.bbobbogi.userchat.common.protocol.MessageType
+import com.bbobbogi.userchat.common.protocol.NoticeMessage
 import com.bbobbogi.userchat.common.protocol.WhisperMessage
 import io.papermc.chzzkmultipleuser.messaging.MessagingProvider
 import io.papermc.chzzkmultipleuser.messaging.api.IStreamBroker
@@ -25,6 +26,7 @@ class RedisMessenger(
     private var serverDisplayName: String = "Server"
 
     private var globalChatHandler: ((GlobalChatMessage) -> Unit)? = null
+    private var noticeHandler: ((NoticeMessage) -> Unit)? = null
     private var whisperHandler: ((WhisperMessage) -> Unit)? = null
     private var whisperNotFoundHandler: ((UUID, String) -> Unit)? = null
 
@@ -74,28 +76,47 @@ class RedisMessenger(
             try {
                 val data = msg.data
                 val type = data["type"] ?: return@consumeStream
-                if (type != MessageType.GLOBAL_CHAT.name) return@consumeStream
 
                 // 자기 서버 메시지는 무시 (조기 반환)
                 val messageServerId = data["serverId"] ?: return@consumeStream
                 if (messageServerId == serverId) return@consumeStream
 
-                val message =
-                    GlobalChatMessage(
-                        serverId = messageServerId,
-                        serverDisplayName = data["serverDisplayName"] ?: "Server",
-                        playerUuid = data["playerUuid"] ?: return@consumeStream,
-                        playerName = data["playerName"] ?: "Unknown",
-                        message = data["message"] ?: return@consumeStream,
-                        timestamp = data["timestamp"]?.toLongOrNull() ?: System.currentTimeMillis(),
-                    )
+                when (type) {
+                    MessageType.GLOBAL_CHAT.name -> {
+                        val message =
+                            GlobalChatMessage(
+                                serverId = messageServerId,
+                                serverDisplayName = data["serverDisplayName"] ?: "Server",
+                                playerUuid = data["playerUuid"] ?: return@consumeStream,
+                                playerName = data["playerName"] ?: "Unknown",
+                                message = data["message"] ?: return@consumeStream,
+                                timestamp = data["timestamp"]?.toLongOrNull() ?: System.currentTimeMillis(),
+                            )
 
-                Bukkit.getScheduler().runTask(
-                    plugin,
-                    Runnable {
-                        globalChatHandler?.invoke(message)
-                    },
-                )
+                        Bukkit.getScheduler().runTask(
+                            plugin,
+                            Runnable {
+                                globalChatHandler?.invoke(message)
+                            },
+                        )
+                    }
+                    MessageType.NOTICE.name -> {
+                        val message =
+                            NoticeMessage(
+                                serverId = messageServerId,
+                                senderName = data["senderName"] ?: "Unknown",
+                                message = data["message"] ?: return@consumeStream,
+                                timestamp = data["timestamp"]?.toLongOrNull() ?: System.currentTimeMillis(),
+                            )
+
+                        Bukkit.getScheduler().runTask(
+                            plugin,
+                            Runnable {
+                                noticeHandler?.invoke(message)
+                            },
+                        )
+                    }
+                }
             } catch (e: Exception) {
                 logger.warning("[UserChat] 전체 채팅 메시지 처리 실패: ${e.message}")
             }
@@ -179,6 +200,32 @@ class RedisMessenger(
 
     override fun setGlobalChatHandler(handler: (GlobalChatMessage) -> Unit) {
         globalChatHandler = handler
+    }
+
+    override fun broadcastNotice(
+        senderName: String,
+        message: String,
+    ) {
+        val broker = streamBroker ?: return
+
+        try {
+            val data =
+                mapOf(
+                    "type" to MessageType.NOTICE.name,
+                    "serverId" to serverId,
+                    "senderName" to senderName,
+                    "message" to message,
+                    "timestamp" to System.currentTimeMillis().toString(),
+                )
+
+            broker.publishStream(ChannelConstants.REDIS_GLOBAL_CHAT_STREAM, data)
+        } catch (e: Exception) {
+            logger.warning("[UserChat] 공지 전송 실패: ${e.message}")
+        }
+    }
+
+    override fun setNoticeHandler(handler: (NoticeMessage) -> Unit) {
+        noticeHandler = handler
     }
 
     override fun sendWhisper(

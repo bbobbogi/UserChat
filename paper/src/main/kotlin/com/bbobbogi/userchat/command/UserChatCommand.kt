@@ -1,11 +1,12 @@
 package com.bbobbogi.userchat.command
 
 import com.bbobbogi.userchat.chat.ChatModeManager
+import com.bbobbogi.userchat.chat.GlobalChatHandler
 import com.bbobbogi.userchat.common.model.ChatMode
 import com.bbobbogi.userchat.config.UserChatConfig
 import com.bbobbogi.userchat.gui.SettingsGui
 import com.bbobbogi.userchat.item.GlobalChatItemManager
-import org.bukkit.Bukkit
+import com.bbobbogi.userchat.service.UserNameProvider
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -17,6 +18,8 @@ class UserChatCommand(
     private val modeManager: ChatModeManager,
     private val itemManager: GlobalChatItemManager,
     private val settingsGui: SettingsGui,
+    private val userNameProvider: UserNameProvider,
+    private val globalChatHandler: GlobalChatHandler,
 ) : CommandExecutor,
     TabCompleter {
     override fun onCommand(
@@ -33,6 +36,7 @@ class UserChatCommand(
         when (args[0].lowercase()) {
             "모드", "mode" -> handleMode(sender, args)
             "아이템지급", "give" -> handleGive(sender, args)
+            "공지", "notice" -> handleNotice(sender, args)
             "재로드", "reload" -> handleReload(sender)
             "관리", "admin", "settings" -> handleSettings(sender)
             else -> sendHelp(sender)
@@ -81,7 +85,7 @@ class UserChatCommand(
             return
         }
 
-        val target = Bukkit.getPlayer(args[1])
+        val target = userNameProvider.findPlayerByName(args[1])
         if (target == null) {
             sender.sendMessage(config.getMessage("player-not-found", "player" to args[1]))
             return
@@ -90,8 +94,28 @@ class UserChatCommand(
         val amount = args.getOrNull(2)?.toIntOrNull() ?: 1
         itemManager.giveItem(target, amount)
 
-        sender.sendMessage(config.getMessage("item-given-admin", "player" to target.name, "amount" to amount.toString()))
+        val targetName = userNameProvider.getPlayerName(target)
+        sender.sendMessage(config.getMessage("item-given-admin", "player" to targetName, "amount" to amount.toString()))
         target.sendMessage(config.getMessage("item-given", "amount" to amount.toString()))
+    }
+
+    private fun handleNotice(
+        sender: CommandSender,
+        args: Array<out String>,
+    ) {
+        if (!sender.hasPermission("userchat.notice")) {
+            sender.sendMessage(config.getMessage("no-permission"))
+            return
+        }
+
+        if (args.size < 2) {
+            sender.sendMessage(config.getMessage("invalid-usage", "usage" to "/유저채팅 공지 <메시지>"))
+            return
+        }
+
+        val message = args.drop(1).joinToString(" ")
+        val senderName = if (sender is Player) sender.name else "Server"
+        globalChatHandler.broadcastNotice(senderName, message)
     }
 
     private fun handleReload(sender: CommandSender) {
@@ -100,8 +124,9 @@ class UserChatCommand(
             return
         }
 
-        config.reload()
+        val warnings = config.reload()
         sender.sendMessage(config.getMessage("config-reloaded"))
+        warnings.forEach { sender.sendMessage("§e[경고] $it") }
     }
 
     private fun handleSettings(sender: CommandSender) {
@@ -122,6 +147,10 @@ class UserChatCommand(
         sender.sendMessage("§6=== UserChat 도움말 ===")
         sender.sendMessage("§e/유저채팅 모드 [거리|전체] §7- 채팅 모드 확인/변경")
 
+        if (sender.hasPermission("userchat.notice")) {
+            sender.sendMessage("§e/유저채팅 공지 <메시지> §7- 전체 서버 공지")
+        }
+
         if (sender.hasPermission("userchat.admin")) {
             sender.sendMessage("§e/유저채팅 아이템지급 <플레이어> [수량] §7- 전체 채팅권 지급")
             sender.sendMessage("§e/유저채팅 재로드 §7- 설정 리로드")
@@ -137,6 +166,9 @@ class UserChatCommand(
     ): List<String> {
         if (args.size == 1) {
             val subCommands = mutableListOf("모드", "mode")
+            if (sender.hasPermission("userchat.notice")) {
+                subCommands.addAll(listOf("공지", "notice"))
+            }
             if (sender.hasPermission("userchat.admin")) {
                 subCommands.addAll(listOf("아이템지급", "give", "재로드", "reload", "관리", "admin", "settings"))
             }
@@ -149,10 +181,7 @@ class UserChatCommand(
                     .filter { it.startsWith(args[1].lowercase()) }
                 "아이템지급", "give" -> {
                     if (sender.hasPermission("userchat.admin")) {
-                        return Bukkit
-                            .getOnlinePlayers()
-                            .map { it.name }
-                            .filter { it.lowercase().startsWith(args[1].lowercase()) }
+                        return userNameProvider.searchByPrefix(args[1])
                     }
                 }
             }
