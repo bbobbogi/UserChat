@@ -42,8 +42,8 @@ class WhisperManager(
             return WhisperResult.SELF
         }
 
-        // 로컬에서 대상 찾기
-        val localTarget = Bukkit.getPlayerExact(targetName)
+        // 로컬에서 대상 찾기 (마인크래프트 이름 또는 닉네임)
+        val localTarget = userNameProvider.findPlayerByName(targetName)
 
         if (localTarget != null) {
             // 로컬 귓속말

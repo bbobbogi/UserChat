@@ -48,6 +48,18 @@ class UserNameProvider(
         }
 
     /**
+     * 이름 또는 닉네임으로 온라인 플레이어 찾기
+     * @param name 찾을 이름 (마인크래프트 이름 또는 닉네임)
+     * @return 찾은 플레이어 또는 null
+     */
+    fun findPlayerByName(name: String): Player? =
+        try {
+            userService?.findPlayerByName(name) ?: Bukkit.getPlayerExact(name)
+        } catch (e: Exception) {
+            Bukkit.getPlayerExact(name)
+        }
+
+    /**
      * 온라인 플레이어 검색 (앞에서부터 매칭, 명령어 자동완성용)
      * @param prefix 검색할 접두사
      * @param limit 최대 결과 개수
@@ -61,7 +73,7 @@ class UserNameProvider(
             val service = userService
             if (service != null) {
                 service
-                    .searchByPrefix(prefix, limit)
+                    .searchByPrefix(prefix = prefix, limit = limit, cursor = null, exactMatch = false)
                     .results
                     .flatMap { listOfNotNull(it.nickname, it.minecraftName) }
                     .distinct()
