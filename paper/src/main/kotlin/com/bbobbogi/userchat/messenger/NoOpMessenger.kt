@@ -2,6 +2,7 @@ package com.bbobbogi.userchat.messenger
 
 import com.bbobbogi.userchat.common.model.MessagingMode
 import com.bbobbogi.userchat.common.protocol.GlobalChatMessage
+import com.bbobbogi.userchat.common.protocol.NoticeMessage
 import com.bbobbogi.userchat.common.protocol.WhisperMessage
 import java.util.UUID
 
@@ -34,6 +35,17 @@ class NoOpMessenger(
     }
 
     override fun setGlobalChatHandler(handler: (GlobalChatMessage) -> Unit) {
+        // No-op
+    }
+
+    override fun broadcastNotice(
+        senderName: String,
+        message: String,
+    ) {
+        // 단일 서버에서는 로컬에서 이미 처리됨
+    }
+
+    override fun setNoticeHandler(handler: (NoticeMessage) -> Unit) {
         // No-op
     }
 

@@ -70,26 +70,28 @@ class WhisperManager(
         target: Player,
         message: String,
     ) {
-        val senderName = userNameProvider.getDisplayName(sender)
-        val targetName = userNameProvider.getDisplayName(target)
+        val senderPlayerName = userNameProvider.getPlayerName(sender)
+        val senderDisplayName = userNameProvider.getDisplayName(sender)
+        val targetPlayerName = userNameProvider.getPlayerName(target)
+        val targetDisplayName = userNameProvider.getDisplayName(target)
 
         // 발신자 화면
-        sender.sendMessage(config.formatWhisperSent(targetName, message))
+        sender.sendMessage(config.formatWhisperSent(targetPlayerName, targetDisplayName, message))
 
         // 수신자 화면
-        target.sendMessage(config.formatWhisperReceived(senderName, message))
+        target.sendMessage(config.formatWhisperReceived(senderPlayerName, senderDisplayName, message))
 
-        // 답장 대상 저장
+        // 답장 대상 저장 (순수 이름 저장)
         lastWhisperFrom[target.uniqueId] =
             WhisperTarget(
                 uuid = sender.uniqueId,
-                name = senderName,
+                name = senderPlayerName,
                 serverId = null,
             )
         lastWhisperFrom[sender.uniqueId] =
             WhisperTarget(
                 uuid = target.uniqueId,
-                name = targetName,
+                name = targetPlayerName,
                 serverId = null,
             )
     }
@@ -102,18 +104,18 @@ class WhisperManager(
         targetName: String,
         message: String,
     ) {
-        val senderName = userNameProvider.getDisplayName(sender)
+        val senderDisplayName = userNameProvider.getDisplayName(sender)
 
         // 메시지 전송
         messenger.sendWhisper(
             senderUuid = sender.uniqueId,
-            senderName = senderName,
+            senderName = senderDisplayName,
             targetName = targetName,
             message = message,
         )
 
-        // 발신자에게 표시 (일단 전송됨으로 표시)
-        sender.sendMessage(config.formatWhisperSent(targetName, message))
+        // 발신자에게 표시 (일단 전송됨으로 표시, 원격에서는 displayName 없으므로 둘 다 같은 값)
+        sender.sendMessage(config.formatWhisperSent(targetName, targetName, message))
 
         // 답장 대상 저장 (원격)
         lastWhisperFrom[sender.uniqueId] =
@@ -134,12 +136,12 @@ class WhisperManager(
         targetName: String,
         message: String,
     ) {
-        val target = Bukkit.getPlayerExact(targetName) ?: return
+        val target = userNameProvider.findPlayerByName(targetName) ?: return
 
-        // 수신자에게 표시
-        target.sendMessage(config.formatWhisperReceived(senderName, message))
+        // 수신자에게 표시 (원격에서는 displayName만 전송되므로 둘 다 같은 값)
+        target.sendMessage(config.formatWhisperReceived(senderName, senderName, message))
 
-        // 답장 대상 저장 (원격)
+        // 답장 대상 저장 (원격, senderName은 displayName이지만 원격이므로 그대로 사용)
         lastWhisperFrom[target.uniqueId] =
             WhisperTarget(
                 uuid = senderUuid,
