@@ -10,8 +10,11 @@ chzzk = "0.0.8"
 exposed = "0.57.0"
 essentialsx = "2.21.2"
 placeholderapi = "2.11.6"
-mockk = "1.13.9"
+mockito = "5.20.0"
+mockito-kotlin = "5.4.0"
 junit = "6.0.1"
+testcontainers = "1.20.4"
+lettuce = "7.1.0.RELEASE"
 ktlint = "14.0.1"
 
 [libraries]
@@ -41,8 +44,12 @@ essentialsx = { group = "net.essentialsx", name = "EssentialsX", version.ref = "
 placeholderapi = { group = "me.clip", name = "placeholderapi", version.ref = "placeholderapi" }
 
 # Test dependencies
-mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
+mockito-core = { group = "org.mockito", name = "mockito-core", version.ref = "mockito" }
+mockito-kotlin = { group = "org.mockito.kotlin", name = "mockito-kotlin", version.ref = "mockito-kotlin" }
 junit-jupiter = { group = "org.junit.jupiter", name = "junit-jupiter", version.ref = "junit" }
+testcontainers = { group = "org.testcontainers", name = "testcontainers", version.ref = "testcontainers" }
+testcontainers-junit = { group = "org.testcontainers", name = "junit-jupiter", version.ref = "testcontainers" }
+lettuce = { group = "io.lettuce", name = "lettuce-core", version.ref = "lettuce" }
 
 [plugins]
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }

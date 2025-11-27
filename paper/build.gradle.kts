@@ -100,8 +100,15 @@ dependencies {
 
     // Test dependencies
     testImplementation(kotlin("test"))
-    testImplementation(libs.mockk)
+    testImplementation(libs.paper.api)
+    testImplementation(libs.mockito.core)
+    testImplementation(libs.mockito.kotlin)
     testImplementation(libs.junit.jupiter)
+
+    // Integration test dependencies
+    testImplementation(libs.testcontainers)
+    testImplementation(libs.testcontainers.junit)
+    testImplementation(libs.lettuce)
 }
 
 base {
