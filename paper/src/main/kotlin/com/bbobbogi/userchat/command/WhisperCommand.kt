@@ -1,7 +1,7 @@
 package com.bbobbogi.userchat.command
 
 import com.bbobbogi.userchat.config.UserChatConfig
-import com.bbobbogi.userchat.service.UserNameProvider
+import com.bbobbogi.userchat.service.IUserNameProvider
 import com.bbobbogi.userchat.whisper.WhisperManager
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
@@ -12,7 +12,7 @@ import org.bukkit.entity.Player
 class WhisperCommand(
     private val config: UserChatConfig,
     private val whisperManager: WhisperManager,
-    private val userNameProvider: UserNameProvider,
+    private val userNameProvider: IUserNameProvider,
 ) : CommandExecutor,
     TabCompleter {
     override fun onCommand(
