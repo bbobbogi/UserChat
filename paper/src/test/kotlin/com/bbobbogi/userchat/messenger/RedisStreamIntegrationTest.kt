@@ -52,7 +52,7 @@ class RedisStreamIntegrationTest {
     private lateinit var client: RedisClient
     private lateinit var commands: RedisCommands<String, String>
     private val serverId = "test-server-1"
-    private val consumerGroup = ChannelConstants.REDIS_CONSUMER_GROUP
+    private val consumerGroup = "userchat-test-group"
 
     @BeforeEach
     fun setUp() {
@@ -270,49 +270,75 @@ class RedisStreamIntegrationTest {
     }
 
     @Test
-    fun `multiple servers can communicate via streams`() {
-        val server1 = "server-1"
-        val server2 = "server-2"
+    fun `multiple servers receive broadcast via different consumer groups`() {
+        // 브로드캐스트 테스트: 서로 다른 consumer group을 가진 두 서버가 같은 메시지를 모두 수신하는지 검증
+        val server1Group = "server-1-group"
+        val server2Group = "server-2-group"
+        val streamKey = ChannelConstants.REDIS_GLOBAL_CHAT_STREAM
 
-        // 서버 1에서 메시지 발행
-        commands.xadd(
-            ChannelConstants.REDIS_GLOBAL_CHAT_STREAM,
-            mapOf(
-                "type" to MessageType.GLOBAL_CHAT.name,
-                "serverId" to server1,
-                "serverDisplayName" to "Server 1",
-                "playerUuid" to UUID.randomUUID().toString(),
-                "playerName" to "Player1",
-                "message" to "Hello from server 1",
-                "timestamp" to System.currentTimeMillis().toString(),
-            ),
-        )
+        // 각 서버용 consumer group 생성
+        try {
+            commands.xgroupCreate(
+                XReadArgs.StreamOffset.from(streamKey, "0"),
+                server1Group,
+                XGroupCreateArgs.Builder.mkstream(),
+            )
+        } catch (e: RedisBusyException) {
+            // 이미 존재하는 경우 무시
+        }
 
-        // 서버 2에서 메시지 발행
-        commands.xadd(
-            ChannelConstants.REDIS_GLOBAL_CHAT_STREAM,
-            mapOf(
-                "type" to MessageType.GLOBAL_CHAT.name,
-                "serverId" to server2,
-                "serverDisplayName" to "Server 2",
-                "playerUuid" to UUID.randomUUID().toString(),
-                "playerName" to "Player2",
-                "message" to "Hello from server 2",
-                "timestamp" to System.currentTimeMillis().toString(),
-            ),
-        )
+        try {
+            commands.xgroupCreate(
+                XReadArgs.StreamOffset.from(streamKey, "0"),
+                server2Group,
+                XGroupCreateArgs.Builder.mkstream(),
+            )
+        } catch (e: RedisBusyException) {
+            // 이미 존재하는 경우 무시
+        }
 
-        // 전체 스트림 읽기 (처음부터)
-        val entries =
-            commands.xread(
-                XReadArgs.StreamOffset.from(ChannelConstants.REDIS_GLOBAL_CHAT_STREAM, "0"),
+        // 메시지 발행
+        val messageId =
+            commands.xadd(
+                streamKey,
+                mapOf(
+                    "type" to MessageType.GLOBAL_CHAT.name,
+                    "serverId" to "publisher-server",
+                    "serverDisplayName" to "Publisher Server",
+                    "playerUuid" to UUID.randomUUID().toString(),
+                    "playerName" to "TestPlayer",
+                    "message" to "Broadcast message",
+                    "timestamp" to System.currentTimeMillis().toString(),
+                ),
+            )
+        assertNotNull(messageId)
+
+        // 서버 1 (consumer group 1)에서 메시지 수신
+        val server1Entries =
+            commands.xreadgroup(
+                Consumer.from(server1Group, "consumer-1"),
+                XReadArgs.StreamOffset.lastConsumed(streamKey),
             )
 
-        assertNotNull(entries)
-        val messages = entries.flatMap { it.body.entries }
+        // 서버 2 (consumer group 2)에서 메시지 수신
+        val server2Entries =
+            commands.xreadgroup(
+                Consumer.from(server2Group, "consumer-2"),
+                XReadArgs.StreamOffset.lastConsumed(streamKey),
+            )
 
-        // 두 서버의 메시지가 모두 포함되어 있는지 확인
-        assertTrue(messages.isNotEmpty())
+        // 두 서버 모두 같은 메시지를 수신해야 함 (브로드캐스트)
+        assertNotNull(server1Entries)
+        assertNotNull(server2Entries)
+        assertTrue(server1Entries.isNotEmpty(), "Server 1 should receive the message")
+        assertTrue(server2Entries.isNotEmpty(), "Server 2 should receive the message")
+
+        val server1Message = server1Entries.last().body
+        val server2Message = server2Entries.last().body
+
+        assertEquals("Broadcast message", server1Message["message"])
+        assertEquals("Broadcast message", server2Message["message"])
+        assertEquals(server1Message["playerName"], server2Message["playerName"])
     }
 
     @Test
@@ -321,6 +347,5 @@ class RedisStreamIntegrationTest {
         assertEquals("userchat:global", ChannelConstants.REDIS_GLOBAL_CHAT_STREAM)
         assertEquals("userchat:notice", ChannelConstants.REDIS_NOTICE_STREAM)
         assertEquals("userchat:whisper", ChannelConstants.REDIS_WHISPER_STREAM)
-        assertEquals("userchat-group", ChannelConstants.REDIS_CONSUMER_GROUP)
     }
 }

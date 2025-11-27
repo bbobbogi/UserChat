@@ -106,10 +106,12 @@ class WhisperManagerTest {
     }
 
     @Test
-    fun `sendWhisper to unknown player with messaging ON returns SENT_REMOTE`() {
+    fun `sendWhisper to unknown player with messaging ON returns SENT_REMOTE when player exists on network`() {
         val sender = createMockPlayer(senderUuid, "Sender")
+        val remoteOfflinePlayer = mock<org.bukkit.OfflinePlayer>()
 
         whenever(userNameProvider.findPlayerByName("RemotePlayer")).thenReturn(null)
+        whenever(userNameProvider.findOfflinePlayerByName("RemotePlayer")).thenReturn(remoteOfflinePlayer)
         whenever(messenger.getMode()).thenReturn(MessagingMode.REDIS)
         whenever(userNameProvider.getDisplayName(sender)).thenReturn("Sender")
 
@@ -122,6 +124,20 @@ class WhisperManagerTest {
             targetName = eq("RemotePlayer"),
             message = eq("hello"),
         )
+    }
+
+    @Test
+    fun `sendWhisper to unknown player with messaging ON returns NOT_FOUND when player not on network`() {
+        val sender = createMockPlayer(senderUuid, "Sender")
+
+        whenever(userNameProvider.findPlayerByName("RemotePlayer")).thenReturn(null)
+        whenever(userNameProvider.findOfflinePlayerByName("RemotePlayer")).thenReturn(null)
+        whenever(messenger.getMode()).thenReturn(MessagingMode.REDIS)
+
+        val result = whisperManager.sendWhisper(sender, "RemotePlayer", "hello")
+
+        assertEquals(WhisperManager.WhisperResult.NOT_FOUND, result)
+        verify(config).getMessage(eq("player-not-found"), any())
     }
 
     @Test

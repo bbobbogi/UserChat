@@ -13,6 +13,7 @@ import com.bbobbogi.userchat.item.GlobalChatItemManager
 import com.bbobbogi.userchat.listener.ChatListener
 import com.bbobbogi.userchat.listener.ItemInteractListener
 import com.bbobbogi.userchat.listener.PlayerConnectionListener
+import com.bbobbogi.userchat.listener.WhisperTabCompleteListener
 import com.bbobbogi.userchat.messenger.ChatMessenger
 import com.bbobbogi.userchat.messenger.NoOpMessenger
 import com.bbobbogi.userchat.messenger.PluginMessageMessenger
@@ -268,6 +269,11 @@ class UserChatPlugin : JavaPlugin() {
 
         pluginManager.registerEvents(
             PlayerConnectionListener(modeManager, whisperManager),
+            this,
+        )
+
+        pluginManager.registerEvents(
+            WhisperTabCompleteListener(userNameProvider),
             this,
         )
 
