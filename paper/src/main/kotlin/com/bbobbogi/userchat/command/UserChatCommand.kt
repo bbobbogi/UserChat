@@ -113,7 +113,11 @@ class UserChatCommand(
             return
         }
 
-        val message = args.drop(1).joinToString(" ")
+        val message = args.drop(1).joinToString(" ").trim()
+        if (message.isEmpty()) {
+            sender.sendMessage(config.getMessage("invalid-usage", "usage" to "/유저채팅 공지 <메시지>"))
+            return
+        }
         val senderName = if (sender is Player) userNameProvider.getDisplayName(sender) else "Server"
         globalChatHandler.broadcastNotice(senderName, message)
     }
