@@ -187,34 +187,43 @@ class UserChatPlugin : JavaPlugin() {
             val commands = event.registrar()
 
             // 전체채팅 명령어 등록 (설정된 경우에만)
-            val globalChatCommandName = config.globalChatCommand
+            val globalChatCommandName = config.globalChatCommand.trim()
             if (globalChatCommandName.isNotBlank()) {
-                val command =
-                    Commands
-                        .literal(globalChatCommandName)
-                        .then(
+                // 명령어 이름 검증: 공백 포함 불가
+                if (globalChatCommandName.contains(' ')) {
+                    logger.warning("[UserChat] 전체채팅 명령어 '$globalChatCommandName' 등록 실패: 공백이 포함된 명령어 이름은 사용할 수 없습니다.")
+                } else {
+                    try {
+                        val command =
                             Commands
-                                .argument("message", StringArgumentType.greedyString())
-                                .executes { ctx ->
-                                    val sender = ctx.source.sender
-                                    if (sender !is Player) {
-                                        sender.sendMessage(config.getMessage("player-only"))
-                                        return@executes 1
-                                    }
+                                .literal(globalChatCommandName)
+                                .then(
+                                    Commands
+                                        .argument("message", StringArgumentType.greedyString())
+                                        .executes { ctx ->
+                                            val sender = ctx.source.sender
+                                            if (sender !is Player) {
+                                                sender.sendMessage(config.getMessage("player-only"))
+                                                return@executes 1
+                                            }
 
-                                    val message = StringArgumentType.getString(ctx, "message")
-                                    globalChatHandler.handleChat(sender, message)
-                                    1
-                                },
-                        ).build()
+                                            val message = StringArgumentType.getString(ctx, "message")
+                                            globalChatHandler.handleChat(sender, message)
+                                            1
+                                        },
+                                ).build()
 
-                commands.register(
-                    command,
-                    "현재 모드와 상관없이 전체채팅 전송",
-                    listOf(),
-                )
+                        commands.register(
+                            command,
+                            "현재 모드와 상관없이 전체채팅 전송",
+                            listOf(),
+                        )
 
-                logger.info("[UserChat] 전체채팅 명령어 '/$globalChatCommandName' 등록 완료")
+                        logger.info("[UserChat] 전체채팅 명령어 '/$globalChatCommandName' 등록 완료")
+                    } catch (e: Exception) {
+                        logger.warning("[UserChat] 전체채팅 명령어 '$globalChatCommandName' 등록 실패: ${e.message}")
+                    }
+                }
             }
 
             // 공지 명령어 등록
