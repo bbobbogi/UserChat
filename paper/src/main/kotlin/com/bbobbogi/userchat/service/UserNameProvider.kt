@@ -122,27 +122,24 @@ class UserNameProvider(
     override fun searchByPrefixAsync(
         prefix: String,
         limit: Int,
-    ): CompletableFuture<List<String>> =
-        try {
-            val service = userService
-            if (service != null) {
-                service
-                    .searchByPrefixAsync(prefix, limit, null, false)
-                    .thenApply { page ->
-                        page.results
-                            .flatMap { listOfNotNull(it.nickname, it.minecraftName) }
-                            .distinct()
-                    }
-            } else {
-                CompletableFuture.completedFuture(
-                    Bukkit
-                        .getOnlinePlayers()
-                        .map { it.name }
-                        .filter { it.lowercase().startsWith(prefix.lowercase()) }
-                        .take(limit),
-                )
-            }
-        } catch (e: Exception) {
-            CompletableFuture.completedFuture(emptyList())
+    ): CompletableFuture<List<String>> {
+        val service = userService
+        return if (service != null) {
+            service
+                .searchByPrefixAsync(prefix, limit, null, false)
+                .thenApply { page ->
+                    page.results
+                        .flatMap { listOfNotNull(it.nickname, it.minecraftName) }
+                        .distinct()
+                }
+        } else {
+            CompletableFuture.completedFuture(
+                Bukkit
+                    .getOnlinePlayers()
+                    .map { it.name }
+                    .filter { it.lowercase().startsWith(prefix.lowercase()) }
+                    .take(limit),
+            )
         }
+    }
 }
