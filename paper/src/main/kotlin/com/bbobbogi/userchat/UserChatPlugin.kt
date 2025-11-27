@@ -159,7 +159,10 @@ class UserChatPlugin : JavaPlugin() {
         }
 
         val replyCommand = ReplyCommand(config, whisperManager)
-        getCommand("답장")?.setExecutor(replyCommand)
+        getCommand("답장")?.apply {
+            setExecutor(replyCommand)
+            tabCompleter = replyCommand
+        }
     }
 
     private fun registerListeners() {
