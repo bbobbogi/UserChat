@@ -75,50 +75,61 @@ class RedisMessenger(
         ) { msg ->
             try {
                 val data = msg.data
-                val type = data["type"] ?: return@consumeStream
 
-                // 자기 서버 메시지는 무시 (조기 반환)
+                // 자기 서버 메시지는 무시
                 val messageServerId = data["serverId"] ?: return@consumeStream
                 if (messageServerId == serverId) return@consumeStream
 
-                when (type) {
-                    MessageType.GLOBAL_CHAT.name -> {
-                        val message =
-                            GlobalChatMessage(
-                                serverId = messageServerId,
-                                serverDisplayName = data["serverDisplayName"] ?: "Server",
-                                playerUuid = data["playerUuid"] ?: return@consumeStream,
-                                playerName = data["playerName"] ?: "Unknown",
-                                message = data["message"] ?: return@consumeStream,
-                                timestamp = data["timestamp"]?.toLongOrNull() ?: System.currentTimeMillis(),
-                            )
+                val message =
+                    GlobalChatMessage(
+                        serverId = messageServerId,
+                        serverDisplayName = data["serverDisplayName"] ?: "Server",
+                        playerUuid = data["playerUuid"] ?: return@consumeStream,
+                        playerName = data["playerName"] ?: "Unknown",
+                        message = data["message"] ?: return@consumeStream,
+                        timestamp = data["timestamp"]?.toLongOrNull() ?: System.currentTimeMillis(),
+                    )
 
-                        Bukkit.getScheduler().runTask(
-                            plugin,
-                            Runnable {
-                                globalChatHandler?.invoke(message)
-                            },
-                        )
-                    }
-                    MessageType.NOTICE.name -> {
-                        val message =
-                            NoticeMessage(
-                                serverId = messageServerId,
-                                senderName = data["senderName"] ?: "Unknown",
-                                message = data["message"] ?: return@consumeStream,
-                                timestamp = data["timestamp"]?.toLongOrNull() ?: System.currentTimeMillis(),
-                            )
-
-                        Bukkit.getScheduler().runTask(
-                            plugin,
-                            Runnable {
-                                noticeHandler?.invoke(message)
-                            },
-                        )
-                    }
-                }
+                Bukkit.getScheduler().runTask(
+                    plugin,
+                    Runnable {
+                        globalChatHandler?.invoke(message)
+                    },
+                )
             } catch (e: Exception) {
                 logger.warning("[UserChat] 전체 채팅 메시지 처리 실패: ${e.message}")
+            }
+        }
+
+        // 공지 스트림 구독
+        broker.consumeStream(
+            ChannelConstants.REDIS_NOTICE_STREAM,
+            ChannelConstants.REDIS_CONSUMER_GROUP,
+            serverId,
+        ) { msg ->
+            try {
+                val data = msg.data
+
+                // 자기 서버 메시지는 무시
+                val messageServerId = data["serverId"] ?: return@consumeStream
+                if (messageServerId == serverId) return@consumeStream
+
+                val message =
+                    NoticeMessage(
+                        serverId = messageServerId,
+                        senderName = data["senderName"] ?: "Unknown",
+                        message = data["message"] ?: return@consumeStream,
+                        timestamp = data["timestamp"]?.toLongOrNull() ?: System.currentTimeMillis(),
+                    )
+
+                Bukkit.getScheduler().runTask(
+                    plugin,
+                    Runnable {
+                        noticeHandler?.invoke(message)
+                    },
+                )
+            } catch (e: Exception) {
+                logger.warning("[UserChat] 공지 메시지 처리 실패: ${e.message}")
             }
         }
 
@@ -211,14 +222,13 @@ class RedisMessenger(
         try {
             val data =
                 mapOf(
-                    "type" to MessageType.NOTICE.name,
                     "serverId" to serverId,
                     "senderName" to senderName,
                     "message" to message,
                     "timestamp" to System.currentTimeMillis().toString(),
                 )
 
-            broker.publishStream(ChannelConstants.REDIS_GLOBAL_CHAT_STREAM, data)
+            broker.publishStream(ChannelConstants.REDIS_NOTICE_STREAM, data)
         } catch (e: Exception) {
             logger.warning("[UserChat] 공지 전송 실패: ${e.message}")
         }
