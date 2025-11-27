@@ -114,7 +114,7 @@ class UserChatCommand(
         }
 
         val message = args.drop(1).joinToString(" ")
-        val senderName = if (sender is Player) sender.name else "Server"
+        val senderName = if (sender is Player) userNameProvider.getDisplayName(sender) else "Server"
         globalChatHandler.broadcastNotice(senderName, message)
     }
 
