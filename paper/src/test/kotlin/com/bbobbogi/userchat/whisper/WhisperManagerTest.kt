@@ -65,11 +65,13 @@ class WhisperManagerTest {
     @Test
     fun `sendWhisper to self is case insensitive`() {
         val sender = createMockPlayer(senderUuid, "TestPlayer")
-        whenever(userNameProvider.findPlayerByName("testplayer")).thenReturn(sender)
+        // Do not mock findPlayerByName, so the logic falls to the self-whisper check
+        // The check is `targetName.equals(sender.name, ignoreCase = true)`
 
-        val result = whisperManager.sendWhisper(sender, "testplayer", "hello")
+        val result = whisperManager.sendWhisper(sender, "tEsTpLaYeR", "hello")
 
         assertEquals(WhisperManager.WhisperResult.SELF, result)
+        verify(config).getMessage(eq("whisper-self"))
     }
 
     @Test

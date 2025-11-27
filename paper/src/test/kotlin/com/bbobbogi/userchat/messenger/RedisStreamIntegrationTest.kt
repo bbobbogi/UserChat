@@ -3,6 +3,7 @@ package com.bbobbogi.userchat.messenger
 import com.bbobbogi.userchat.common.protocol.ChannelConstants
 import com.bbobbogi.userchat.common.protocol.MessageType
 import io.lettuce.core.Consumer
+import io.lettuce.core.RedisBusyException
 import io.lettuce.core.RedisClient
 import io.lettuce.core.XGroupCreateArgs
 import io.lettuce.core.XReadArgs
@@ -73,8 +74,11 @@ class RedisStreamIntegrationTest {
                 consumerGroup,
                 XGroupCreateArgs.Builder.mkstream(),
             )
-        } catch (e: Exception) {
+        } catch (e: RedisBusyException) {
             // BUSYGROUP 오류 무시 (이미 존재하는 경우)
+            if (!e.message.orEmpty().contains("BUSYGROUP")) {
+                throw e
+            }
         }
     }
 
