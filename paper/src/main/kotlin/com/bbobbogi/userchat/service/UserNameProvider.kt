@@ -37,13 +37,23 @@ class UserNameProvider(
         }
 
     /**
-     * 플레이어의 표시 이름 가져오기
+     * 플레이어의 표시 이름 가져오기 (prefix 포함)
      */
     fun getDisplayName(player: Player): String =
         try {
             userService?.getDisplayName(player) ?: player.name
         } catch (e: Exception) {
             logger.warning("[UserChat] 닉네임 가져오기 실패: ${e.message}")
+            player.name
+        }
+
+    /**
+     * 플레이어의 순수 닉네임 가져오기 (prefix 미포함, 명령어용)
+     */
+    fun getPlayerName(player: Player): String =
+        try {
+            userService?.getPlayerName(player) ?: player.name
+        } catch (e: Exception) {
             player.name
         }
 

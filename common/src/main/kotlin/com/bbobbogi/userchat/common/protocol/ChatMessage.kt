@@ -14,6 +14,15 @@ data class GlobalChatMessage(
 )
 
 @Serializable
+data class NoticeMessage(
+    val type: String = MessageType.NOTICE.name,
+    val serverId: String,
+    val senderName: String,
+    val message: String,
+    val timestamp: Long = System.currentTimeMillis(),
+)
+
+@Serializable
 data class WhisperMessage(
     val type: String = MessageType.WHISPER.name,
     val senderUuid: String,

@@ -2,6 +2,7 @@ package com.bbobbogi.userchat.messenger
 
 import com.bbobbogi.userchat.common.model.MessagingMode
 import com.bbobbogi.userchat.common.protocol.GlobalChatMessage
+import com.bbobbogi.userchat.common.protocol.NoticeMessage
 import com.bbobbogi.userchat.common.protocol.WhisperMessage
 import java.util.UUID
 
@@ -27,6 +28,14 @@ interface ChatMessenger {
     )
 
     fun setGlobalChatHandler(handler: (GlobalChatMessage) -> Unit)
+
+    // 공지
+    fun broadcastNotice(
+        senderName: String,
+        message: String,
+    )
+
+    fun setNoticeHandler(handler: (NoticeMessage) -> Unit)
 
     // 귓속말
     fun sendWhisper(

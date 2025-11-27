@@ -4,6 +4,7 @@ import com.bbobbogi.userchat.common.model.MessagingMode
 import com.bbobbogi.userchat.common.protocol.ChannelConstants
 import com.bbobbogi.userchat.common.protocol.GlobalChatMessage
 import com.bbobbogi.userchat.common.protocol.MessageType
+import com.bbobbogi.userchat.common.protocol.NoticeMessage
 import com.bbobbogi.userchat.common.protocol.WhisperMessage
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -32,6 +33,7 @@ class PluginMessageMessenger(
     private val json = Json { ignoreUnknownKeys = true }
 
     private var globalChatHandler: ((GlobalChatMessage) -> Unit)? = null
+    private var noticeHandler: ((NoticeMessage) -> Unit)? = null
     private var whisperHandler: ((WhisperMessage) -> Unit)? = null
     private var whisperNotFoundHandler: ((UUID, String) -> Unit)? = null
     private var lastNoPlayerLogTime = 0L
@@ -73,6 +75,25 @@ class PluginMessageMessenger(
 
     override fun setGlobalChatHandler(handler: (GlobalChatMessage) -> Unit) {
         globalChatHandler = handler
+    }
+
+    override fun broadcastNotice(
+        senderName: String,
+        message: String,
+    ) {
+        val noticeMessage =
+            NoticeMessage(
+                serverId = serverId,
+                senderName = senderName,
+                message = message,
+            )
+
+        val data = encodeMessage(MessageType.NOTICE.name, json.encodeToString(noticeMessage))
+        sendPluginMessage(data)
+    }
+
+    override fun setNoticeHandler(handler: (NoticeMessage) -> Unit) {
+        noticeHandler = handler
     }
 
     override fun sendWhisper(
@@ -123,6 +144,10 @@ class PluginMessageMessenger(
                 MessageType.GLOBAL_CHAT.name -> {
                     val message = json.decodeFromString<GlobalChatMessage>(payload)
                     globalChatHandler?.invoke(message)
+                }
+                MessageType.NOTICE.name -> {
+                    val message = json.decodeFromString<NoticeMessage>(payload)
+                    noticeHandler?.invoke(message)
                 }
                 MessageType.WHISPER.name -> {
                     val message = json.decodeFromString<WhisperMessage>(payload)

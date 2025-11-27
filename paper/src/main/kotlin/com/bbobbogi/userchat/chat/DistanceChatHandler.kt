@@ -22,7 +22,8 @@ class DistanceChatHandler(
         }
 
         val range = config.distanceRange.toDouble()
-        val playerName = userNameProvider.getDisplayName(player)
+        val playerName = userNameProvider.getPlayerName(player)
+        val displayName = userNameProvider.getDisplayName(player)
 
         // 범위 내 플레이어 필터링 (같은 월드)
         val nearbyPlayers =
@@ -30,7 +31,7 @@ class DistanceChatHandler(
                 other.location.distance(player.location) <= range
             }
 
-        val formattedMessage = config.formatDistanceChat(playerName, message)
+        val formattedMessage = config.formatDistanceChat(playerName, displayName, message)
 
         // 범위 내 플레이어에게만 전송
         nearbyPlayers.forEach { it.sendMessage(formattedMessage) }
