@@ -51,9 +51,7 @@ class WhisperTabCompleteListener(
         userNameProvider
             .searchByPrefixAsync(prefix, 10)
             .thenAccept { results ->
-                if (results.isNotEmpty()) {
-                    event.completions = results
-                }
+                event.completions = results
             }
     }
 }
