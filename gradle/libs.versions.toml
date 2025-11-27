@@ -10,7 +10,8 @@ chzzk = "0.0.8"
 exposed = "0.57.0"
 essentialsx = "2.21.2"
 placeholderapi = "2.11.6"
-mockk = "1.13.9"
+mockito = "5.20.0"
+mockito-kotlin = "5.4.0"
 junit = "6.0.1"
 ktlint = "14.0.1"
 
@@ -41,7 +42,8 @@ essentialsx = { group = "net.essentialsx", name = "EssentialsX", version.ref = "
 placeholderapi = { group = "me.clip", name = "placeholderapi", version.ref = "placeholderapi" }
 
 # Test dependencies
-mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
+mockito-core = { group = "org.mockito", name = "mockito-core", version.ref = "mockito" }
+mockito-kotlin = { group = "org.mockito.kotlin", name = "mockito-kotlin", version.ref = "mockito-kotlin" }
 junit-jupiter = { group = "org.junit.jupiter", name = "junit-jupiter", version.ref = "junit" }
 
 [plugins]

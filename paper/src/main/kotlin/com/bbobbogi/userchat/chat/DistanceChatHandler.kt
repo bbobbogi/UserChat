@@ -1,12 +1,12 @@
 package com.bbobbogi.userchat.chat
 
 import com.bbobbogi.userchat.config.UserChatConfig
-import com.bbobbogi.userchat.service.UserNameProvider
+import com.bbobbogi.userchat.service.IUserNameProvider
 import org.bukkit.entity.Player
 
 class DistanceChatHandler(
     private val config: UserChatConfig,
-    private val userNameProvider: UserNameProvider,
+    private val userNameProvider: IUserNameProvider,
 ) {
     /**
      * 거리 기반 채팅 처리
