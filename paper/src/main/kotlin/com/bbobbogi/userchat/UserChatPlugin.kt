@@ -19,7 +19,11 @@ import com.bbobbogi.userchat.messenger.PluginMessageMessenger
 import com.bbobbogi.userchat.messenger.RedisMessenger
 import com.bbobbogi.userchat.service.UserNameProvider
 import com.bbobbogi.userchat.whisper.WhisperManager
+import com.mojang.brigadier.arguments.StringArgumentType
 import io.papermc.chzzkmultipleuser.messaging.MessagingProvider
+import io.papermc.paper.command.brigadier.Commands
+import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents
+import org.bukkit.entity.Player
 import org.bukkit.plugin.java.JavaPlugin
 import java.util.UUID
 
@@ -128,6 +132,15 @@ class UserChatPlugin : JavaPlugin() {
             )
         }
 
+        // 공지 수신 핸들러
+        messenger.setNoticeHandler { message ->
+            globalChatHandler.handleRemoteNotice(
+                serverId = message.serverId,
+                senderName = message.senderName,
+                message = message.message,
+            )
+        }
+
         // 귓속말 수신 핸들러
         messenger.setWhisperHandler { message ->
             whisperManager.handleRemoteWhisper(
@@ -146,7 +159,7 @@ class UserChatPlugin : JavaPlugin() {
     }
 
     private fun registerCommands() {
-        val userChatCommand = UserChatCommand(config, modeManager, itemManager, settingsGui)
+        val userChatCommand = UserChatCommand(config, modeManager, itemManager, settingsGui, userNameProvider, globalChatHandler)
         getCommand("유저채팅")?.apply {
             setExecutor(userChatCommand)
             tabCompleter = userChatCommand
@@ -162,6 +175,81 @@ class UserChatPlugin : JavaPlugin() {
         getCommand("답장")?.apply {
             setExecutor(replyCommand)
             tabCompleter = replyCommand
+        }
+
+        // 동적 명령어 등록 (전체채팅, 공지)
+        registerDynamicCommands()
+    }
+
+    @Suppress("UnstableApiUsage")
+    private fun registerDynamicCommands() {
+        lifecycleManager.registerEventHandler(LifecycleEvents.COMMANDS) { event ->
+            val commands = event.registrar()
+
+            // 전체채팅 명령어 등록 (설정된 경우에만)
+            val globalChatCommandName = config.globalChatCommand.trim()
+            if (globalChatCommandName.isNotBlank()) {
+                // 명령어 이름 검증: 공백 포함 불가
+                if (globalChatCommandName.contains(' ')) {
+                    logger.warning("[UserChat] 전체채팅 명령어 '$globalChatCommandName' 등록 실패: 공백이 포함된 명령어 이름은 사용할 수 없습니다.")
+                } else {
+                    try {
+                        val command =
+                            Commands
+                                .literal(globalChatCommandName)
+                                .then(
+                                    Commands
+                                        .argument("message", StringArgumentType.greedyString())
+                                        .executes { ctx ->
+                                            val sender = ctx.source.sender
+                                            if (sender !is Player) {
+                                                sender.sendMessage(config.getMessage("player-only"))
+                                                return@executes 1
+                                            }
+
+                                            val message = StringArgumentType.getString(ctx, "message")
+                                            globalChatHandler.handleChat(sender, message)
+                                            1
+                                        },
+                                ).build()
+
+                        commands.register(
+                            command,
+                            "현재 모드와 상관없이 전체채팅 전송",
+                            listOf(),
+                        )
+
+                        logger.info("[UserChat] 전체채팅 명령어 '/$globalChatCommandName' 등록 완료")
+                    } catch (e: Exception) {
+                        logger.warning("[UserChat] 전체채팅 명령어 '$globalChatCommandName' 등록 실패: ${e.message}")
+                    }
+                }
+            }
+
+            // 공지 명령어 등록
+            val noticeCommand =
+                Commands
+                    .literal("공지")
+                    .requires { it.sender.hasPermission("userchat.notice") }
+                    .then(
+                        Commands
+                            .argument("message", StringArgumentType.greedyString())
+                            .executes { ctx ->
+                                val sender = ctx.source.sender
+                                val message = StringArgumentType.getString(ctx, "message")
+                                val senderName = if (sender is Player) sender.name else "Server"
+                                globalChatHandler.broadcastNotice(senderName, message)
+                                1
+                            },
+                    ).build()
+
+            commands.register(
+                noticeCommand,
+                "전체 서버 공지",
+                listOf("notice"),
+            )
+
+            logger.info("[UserChat] 공지 명령어 '/공지' 등록 완료")
         }
     }
 

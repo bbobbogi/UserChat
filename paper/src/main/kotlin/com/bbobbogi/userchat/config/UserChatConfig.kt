@@ -23,6 +23,8 @@ class UserChatConfig(
     var distanceRange: Int = 100
     var globalRequireItem: Boolean = true
     var switchToDistanceOnNoItem: Boolean = true
+    var globalChatCommand: String = ""
+        private set
 
     // Item
     var itemMaterial: Material = Material.PAPER
@@ -53,6 +55,7 @@ class UserChatConfig(
         distanceRange = config.getInt("chat.distance.range", 100)
         globalRequireItem = config.getBoolean("chat.global.require-item", true)
         switchToDistanceOnNoItem = config.getBoolean("chat.global.switch-to-distance-on-no-item", true)
+        globalChatCommand = config.getString("chat.global.command", "") ?: ""
 
         // Item
         itemMaterial = Material.matchMaterial(config.getString("item.material", "PAPER") ?: "PAPER")
@@ -83,8 +86,21 @@ class UserChatConfig(
         plugin.saveConfig()
     }
 
-    fun reload() {
+    /**
+     * 설정을 리로드합니다.
+     * @return 서버 재시작이 필요한 변경사항이 있으면 경고 메시지 목록 반환
+     */
+    fun reload(): List<String> {
+        val warnings = mutableListOf<String>()
+        val oldGlobalChatCommand = globalChatCommand
+
         load()
+
+        if (oldGlobalChatCommand != globalChatCommand) {
+            warnings.add("전체채팅 명령어 변경은 서버 재시작 후 적용됩니다.")
+        }
+
+        return warnings
     }
 
     // Message helpers
@@ -109,19 +125,24 @@ class UserChatConfig(
 
     fun formatDistanceChat(
         playerName: String,
+        displayName: String,
         message: String,
     ): Component {
         val format =
             messages["distance-format"]
                 ?: "<gray>[근처]</gray> <white>%player%</white>: %message%"
         return miniMessage.deserialize(
-            format.replace("%player%", playerName).replace("%message%", message),
+            format
+                .replace("%player_name%", playerName)
+                .replace("%player%", displayName)
+                .replace("%message%", miniMessage.escapeTags(message)),
         )
     }
 
     fun formatGlobalChat(
         serverName: String,
         playerName: String,
+        displayName: String,
         message: String,
     ): Component {
         val format =
@@ -130,28 +151,47 @@ class UserChatConfig(
         return miniMessage.deserialize(
             format
                 .replace("%server%", serverName)
-                .replace("%player%", playerName)
-                .replace("%message%", message),
+                .replace("%player_name%", playerName)
+                .replace("%player%", displayName)
+                .replace("%message%", miniMessage.escapeTags(message)),
         )
     }
 
     fun formatWhisperSent(
         targetName: String,
+        targetDisplayName: String,
         message: String,
     ): Component {
         val format = messages["whisper-sent"] ?: "<gray>[나 → %target%] %message%</gray>"
         return miniMessage.deserialize(
-            format.replace("%target%", targetName).replace("%message%", message),
+            format
+                .replace("%target_name%", targetName)
+                .replace("%target%", targetDisplayName)
+                .replace("%message%", miniMessage.escapeTags(message)),
         )
     }
 
     fun formatWhisperReceived(
         senderName: String,
+        senderDisplayName: String,
         message: String,
     ): Component {
         val format = messages["whisper-received"] ?: "<gray>[%sender% → 나] %message%</gray>"
         return miniMessage.deserialize(
-            format.replace("%sender%", senderName).replace("%message%", message),
+            format
+                .replace("%sender_name%", senderName)
+                .replace("%sender%", senderDisplayName)
+                .replace("%message%", miniMessage.escapeTags(message)),
+        )
+    }
+
+    fun formatNotice(
+        senderName: String,
+        message: String,
+    ): Component {
+        val format = messages["notice-format"] ?: "<red>[공지]</red> <yellow>%sender%</yellow>: %message%"
+        return miniMessage.deserialize(
+            format.replace("%sender%", senderName).replace("%message%", miniMessage.escapeTags(message)),
         )
     }
 }

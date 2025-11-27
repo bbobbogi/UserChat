@@ -23,6 +23,7 @@ chat:
   global:
     require-item: true  # 아이템 필요 여부
     switch-to-distance-on-no-item: true  # 아이템 없을 때 거리 모드로 자동 전환
+    command: ""  # 현재 모드와 상관없이 전체채팅 명령어 (빈 값이면 비활성화, 예: "전체채팅")
 
 # 전체 채팅 아이템
 item:
@@ -37,12 +38,16 @@ item:
     - "<yellow>우클릭: 전체 채팅 모드 전환</yellow>"
 
 # 메시지 포맷
+# %player% = 표시 이름 (prefix 포함), %player_name% = 순수 닉네임 (명령어용)
 messages:
   prefix: "<gold>[채팅]</gold> "
 
-  # 채팅 포맷
-  distance-format: "<gray>[근처]</gray> <white>%player%</white>: %message%"
-  global-format: "<gold>[전체]</gold> <gray>[%server%]</gray> <white>%player%</white>: %message%"
+  # 채팅 포맷 (클릭하면 귓속말 명령어 자동 입력)
+  distance-format: "<gray>[근처]</gray> <click:suggest_command:'/귓속말 %player_name% '><hover:show_text:'<gray>클릭하여 귓속말'>%player%</hover></click>: %message%"
+  global-format: "<gold>[전체]</gold> <gray>[%server%]</gray> <click:suggest_command:'/귓속말 %player_name% '><hover:show_text:'<gray>클릭하여 귓속말'>%player%</hover></click>: %message%"
+
+  # 공지 포맷
+  notice-format: "<red>[공지]</red> <yellow>%sender%</yellow>: %message%"
 
   # 시스템 메시지
   mode-changed: "<gray>채팅 모드가 <yellow>%mode%</yellow>로 변경되었습니다.</gray>"
@@ -56,9 +61,11 @@ messages:
   item-given-admin: "<green>%player%에게 전체 채팅권 %amount%개를 지급했습니다.</green>"
   config-reloaded: "<green>설정을 리로드했습니다.</green>"
 
-  # 귓속말
-  whisper-sent: "<gray>[나 → %target%] %message%</gray>"
-  whisper-received: "<gray>[%sender% → 나] %message%</gray>"
+  # 귓속말 (클릭하면 답장 명령어 자동 입력)
+  # %target% = 표시 이름, %target_name% = 순수 닉네임
+  # %sender% = 표시 이름, %sender_name% = 순수 닉네임
+  whisper-sent: "<gray>[나 → </gray>%target%<gray>]</gray> %message%"
+  whisper-received: "<click:suggest_command:'/귓속말 %sender_name% '><hover:show_text:'<gray>클릭하여 답장'><gray>[</gray>%sender%<gray> → 나]</gray> %message%</hover></click>"
   no-reply-target: "<red>답장할 대상이 없습니다.</red>"
   player-not-found: "<red>'%player%' 플레이어를 찾을 수 없습니다.</red>"
   whisper-self: "<red>자기 자신에게는 귓속말을 보낼 수 없습니다.</red>"
