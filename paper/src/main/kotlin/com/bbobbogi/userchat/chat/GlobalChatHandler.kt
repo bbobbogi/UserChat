@@ -4,7 +4,7 @@ import com.bbobbogi.userchat.common.model.ChatMode
 import com.bbobbogi.userchat.config.UserChatConfig
 import com.bbobbogi.userchat.item.GlobalChatItemManager
 import com.bbobbogi.userchat.messenger.ChatMessenger
-import com.bbobbogi.userchat.service.UserNameProvider
+import com.bbobbogi.userchat.service.IUserNameProvider
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 
@@ -13,7 +13,7 @@ class GlobalChatHandler(
     private val itemManager: GlobalChatItemManager,
     private val messenger: ChatMessenger,
     private val modeManager: ChatModeManager,
-    private val userNameProvider: UserNameProvider,
+    private val userNameProvider: IUserNameProvider,
 ) {
     /**
      * 전체 채팅 처리

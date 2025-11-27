@@ -6,7 +6,7 @@ import com.bbobbogi.userchat.common.model.ChatMode
 import com.bbobbogi.userchat.config.UserChatConfig
 import com.bbobbogi.userchat.gui.SettingsGui
 import com.bbobbogi.userchat.item.GlobalChatItemManager
-import com.bbobbogi.userchat.service.UserNameProvider
+import com.bbobbogi.userchat.service.IUserNameProvider
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -18,7 +18,7 @@ class UserChatCommand(
     private val modeManager: ChatModeManager,
     private val itemManager: GlobalChatItemManager,
     private val settingsGui: SettingsGui,
-    private val userNameProvider: UserNameProvider,
+    private val userNameProvider: IUserNameProvider,
     private val globalChatHandler: GlobalChatHandler,
 ) : CommandExecutor,
     TabCompleter {

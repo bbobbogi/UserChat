@@ -3,7 +3,7 @@ package com.bbobbogi.userchat.whisper
 import com.bbobbogi.userchat.common.model.MessagingMode
 import com.bbobbogi.userchat.config.UserChatConfig
 import com.bbobbogi.userchat.messenger.ChatMessenger
-import com.bbobbogi.userchat.service.UserNameProvider
+import com.bbobbogi.userchat.service.IUserNameProvider
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 import java.util.UUID
@@ -12,7 +12,7 @@ import java.util.concurrent.ConcurrentHashMap
 class WhisperManager(
     private val config: UserChatConfig,
     private val messenger: ChatMessenger,
-    private val userNameProvider: UserNameProvider,
+    private val userNameProvider: IUserNameProvider,
 ) {
     companion object {
         val NIL_UUID: UUID = UUID.fromString("00000000-0000-0000-0000-000000000000")

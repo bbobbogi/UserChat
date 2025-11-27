@@ -13,7 +13,7 @@ import java.util.logging.Logger
 class UserNameProvider(
     private val plugin: Plugin,
     private val logger: Logger,
-) {
+) : IUserNameProvider {
     private var userService: UserService? = null
 
     fun initialize(): Boolean =
@@ -39,7 +39,7 @@ class UserNameProvider(
     /**
      * 플레이어의 표시 이름 가져오기 (prefix 포함)
      */
-    fun getDisplayName(player: Player): String =
+    override fun getDisplayName(player: Player): String =
         try {
             userService?.getDisplayName(player) ?: player.name
         } catch (e: Exception) {
@@ -50,7 +50,7 @@ class UserNameProvider(
     /**
      * 플레이어의 순수 닉네임 가져오기 (prefix 미포함, 명령어용)
      */
-    fun getPlayerName(player: Player): String =
+    override fun getPlayerName(player: Player): String =
         try {
             userService?.getPlayerName(player) ?: player.name
         } catch (e: Exception) {
@@ -62,7 +62,7 @@ class UserNameProvider(
      * @param name 찾을 이름 (마인크래프트 이름 또는 닉네임)
      * @return 찾은 플레이어 또는 null
      */
-    fun findPlayerByName(name: String): Player? =
+    override fun findPlayerByName(name: String): Player? =
         try {
             userService?.findPlayerByName(name) ?: Bukkit.getPlayerExact(name)
         } catch (e: Exception) {
@@ -75,9 +75,9 @@ class UserNameProvider(
      * @param limit 최대 결과 개수
      * @return 검색된 플레이어 이름 목록
      */
-    fun searchByPrefix(
+    override fun searchByPrefix(
         prefix: String,
-        limit: Int = 10,
+        limit: Int,
     ): List<String> =
         try {
             val service = userService
