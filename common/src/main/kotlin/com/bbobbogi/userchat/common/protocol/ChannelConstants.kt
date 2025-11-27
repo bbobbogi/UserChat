@@ -5,5 +5,4 @@ object ChannelConstants {
     const val REDIS_GLOBAL_CHAT_STREAM = "userchat:global"
     const val REDIS_NOTICE_STREAM = "userchat:notice"
     const val REDIS_WHISPER_STREAM = "userchat:whisper"
-    const val REDIS_CONSUMER_GROUP = "userchat-group"
 }

@@ -70,7 +70,6 @@ class RedisMessenger(
         // 전체 채팅 스트림 구독
         broker.consumeStream(
             ChannelConstants.REDIS_GLOBAL_CHAT_STREAM,
-            ChannelConstants.REDIS_CONSUMER_GROUP,
             serverId,
         ) { msg ->
             try {
@@ -104,7 +103,6 @@ class RedisMessenger(
         // 공지 스트림 구독
         broker.consumeStream(
             ChannelConstants.REDIS_NOTICE_STREAM,
-            ChannelConstants.REDIS_CONSUMER_GROUP,
             serverId,
         ) { msg ->
             try {
@@ -136,7 +134,6 @@ class RedisMessenger(
         // 귓속말 스트림 구독
         broker.consumeStream(
             ChannelConstants.REDIS_WHISPER_STREAM,
-            ChannelConstants.REDIS_CONSUMER_GROUP,
             serverId,
         ) { msg ->
             try {
@@ -181,7 +178,7 @@ class RedisMessenger(
     }
 
     override fun shutdown() {
-        streamBroker?.stopAllConsuming()
+        streamBroker?.close()
     }
 
     override fun broadcastGlobalChat(

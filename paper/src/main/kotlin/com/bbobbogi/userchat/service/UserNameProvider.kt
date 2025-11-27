@@ -2,8 +2,10 @@ package com.bbobbogi.userchat.service
 
 import io.papermc.chzzkmultipleuser.feature.user.UserService
 import org.bukkit.Bukkit
+import org.bukkit.OfflinePlayer
 import org.bukkit.entity.Player
 import org.bukkit.plugin.Plugin
+import java.util.concurrent.CompletableFuture
 import java.util.logging.Logger
 
 /**
@@ -100,5 +102,47 @@ class UserNameProvider(
                 .map { it.name }
                 .filter { it.lowercase().startsWith(prefix.lowercase()) }
                 .take(limit)
+        }
+
+    /**
+     * 이름 또는 닉네임으로 플레이어 찾기 (오프라인 포함, 네트워크 전체)
+     * VelocityUserService 사용 시 네트워크 전체 플레이어 검색
+     */
+    override fun findOfflinePlayerByName(name: String): OfflinePlayer? =
+        try {
+            userService?.findOfflinePlayerByName(name)
+        } catch (e: Exception) {
+            logger.warning("[UserChat] 오프라인 플레이어 검색 실패: ${e.message}")
+            null
+        }
+
+    /**
+     * 플레이어 검색 (비동기, 온라인 플레이어)
+     */
+    override fun searchByPrefixAsync(
+        prefix: String,
+        limit: Int,
+    ): CompletableFuture<List<String>> =
+        try {
+            val service = userService
+            if (service != null) {
+                service
+                    .searchByPrefixAsync(prefix, limit, null, false)
+                    .thenApply { page ->
+                        page.results
+                            .flatMap { listOfNotNull(it.nickname, it.minecraftName) }
+                            .distinct()
+                    }
+            } else {
+                CompletableFuture.completedFuture(
+                    Bukkit
+                        .getOnlinePlayers()
+                        .map { it.name }
+                        .filter { it.lowercase().startsWith(prefix.lowercase()) }
+                        .take(limit),
+                )
+            }
+        } catch (e: Exception) {
+            CompletableFuture.completedFuture(emptyList())
         }
 }

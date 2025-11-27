@@ -53,12 +53,27 @@ class WhisperManager(
 
         // 원격 귓속말 시도 (메시징 모드가 OFF가 아닌 경우)
         if (messenger.getMode() != MessagingMode.OFF) {
+            // 네트워크에서 플레이어 존재 확인 (VelocityUserService 사용 시 네트워크 전체 검색)
+            val networkTarget = userNameProvider.findOfflinePlayerByName(targetName)
+            if (networkTarget == null) {
+                // 네트워크 전체에서 찾을 수 없음
+                sender.sendMessage(config.getMessage("player-not-found", "player" to targetName))
+                return WhisperResult.NOT_FOUND
+            }
+
             sendRemoteWhisper(sender, targetName, message)
             return WhisperResult.SENT_REMOTE
         }
 
-        // 플레이어를 찾을 수 없음
-        sender.sendMessage(config.getMessage("player-not-found", "player" to targetName))
+        // 메시징 OFF - 네트워크에서도 확인
+        val networkTarget = userNameProvider.findOfflinePlayerByName(targetName)
+        if (networkTarget != null) {
+            // 플레이어가 네트워크에 있지만 메시징 불가
+            sender.sendMessage(config.getMessage("player-not-found", "player" to targetName))
+        } else {
+            // 네트워크 전체에서 찾을 수 없음
+            sender.sendMessage(config.getMessage("player-not-found", "player" to targetName))
+        }
         return WhisperResult.NOT_FOUND
     }
 
