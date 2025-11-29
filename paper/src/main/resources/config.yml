@@ -5,7 +5,7 @@
 # 메시징 모드
 # OFF: 단일 서버 (cross-server 없음)
 # PLUGIN_MESSAGE: Velocity/BungeeCord 사용
-# REDIS: Redis Stream 사용 (ChzzkMultipleUser 필요)
+# REDIS: Redis Stream 사용 (BbobbogiPlugin 필요)
 messaging:
   mode: OFF
 

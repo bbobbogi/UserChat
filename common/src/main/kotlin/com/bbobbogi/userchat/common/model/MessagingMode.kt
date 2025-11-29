@@ -3,7 +3,7 @@ package com.bbobbogi.userchat.common.model
 enum class MessagingMode {
     OFF, // 단일 서버 (cross-server 없음)
     PLUGIN_MESSAGE, // Velocity/BungeeCord PluginMessage
-    REDIS, // Redis Stream (ChzzkMultipleUser)
+    REDIS, // Redis Stream (BbobbogiPlugin)
     ;
 
     companion object {

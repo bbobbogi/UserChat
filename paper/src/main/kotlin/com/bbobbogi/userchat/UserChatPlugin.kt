@@ -1,5 +1,6 @@
 package com.bbobbogi.userchat
 
+import com.bbobbogi.messaging.MessagingProvider
 import com.bbobbogi.userchat.chat.ChatModeManager
 import com.bbobbogi.userchat.chat.DistanceChatHandler
 import com.bbobbogi.userchat.chat.GlobalChatHandler
@@ -21,7 +22,6 @@ import com.bbobbogi.userchat.messenger.RedisMessenger
 import com.bbobbogi.userchat.service.UserNameProvider
 import com.bbobbogi.userchat.whisper.WhisperManager
 import com.mojang.brigadier.arguments.StringArgumentType
-import io.papermc.chzzkmultipleuser.messaging.MessagingProvider
 import io.papermc.paper.command.brigadier.Commands
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents
 import org.bukkit.entity.Player

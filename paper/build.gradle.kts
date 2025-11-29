@@ -16,7 +16,7 @@ bukkitPluginYaml {
     description = "거리 기반 채팅, 전체 채팅, 귓속말 시스템"
     authors.add("bbobbogi")
 
-    softDepend.add("ChzzkMultipleUser")
+    softDepend.add("BbobbogiPlugin")
 
     // libraries.addAll(
     //     libs.kotlin.stdlib
@@ -83,12 +83,11 @@ dependencies {
     // Paper API
     compileOnly(libs.paper.api)
 
-    // ChzzkMultipleUser modules
-    compileOnly(libs.chzzk.core)
-    compileOnly(libs.chzzk.common)
-    compileOnly(libs.chzzk.database)
-    compileOnly(libs.chzzk.feature.integration)
-    compileOnly(libs.chzzk.messaging)
+    // BbobbogiPlugin modules
+    compileOnly(libs.bbobbogi.core)
+    compileOnly(libs.bbobbogi.database)
+    compileOnly(libs.bbobbogi.user)
+    compileOnly(libs.bbobbogi.messaging)
 
     // Exposed (for table definitions)
     compileOnly(libs.exposed.core)

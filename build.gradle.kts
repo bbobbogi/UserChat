@@ -49,33 +49,33 @@ subprojects {
         maven("https://repo.papermc.io/repository/maven-public/") {
             name = "papermc-repo"
             content {
-                excludeGroup("io.github.bbobbogi")
+                excludeGroup("com.bbobbogi")
             }
         }
         maven("https://oss.sonatype.org/content/groups/public/") {
             content {
-                excludeGroup("io.github.bbobbogi")
+                excludeGroup("com.bbobbogi")
             }
         }
         maven("https://repo.essentialsx.net/releases/") {
             content {
-                excludeGroup("io.github.bbobbogi")
+                excludeGroup("com.bbobbogi")
             }
         }
         maven("https://repo.extendedclip.com/content/repositories/placeholderapi/") {
             content {
-                excludeGroup("io.github.bbobbogi")
+                excludeGroup("com.bbobbogi")
             }
         }
         maven("https://jitpack.io") {
             content {
-                excludeGroup("io.github.bbobbogi")
+                excludeGroup("com.bbobbogi")
             }
         }
         maven("https://maven.pkg.github.com/bbobbogi/chzzkmultipleuser") {
-            name = "GitHubPackagesChzzkMultipleUser"
+            name = "GitHubPackagesBbobbogiPlugin"
             content {
-                includeGroup("io.papermc.chzzkmultipleuser")
+                includeGroup("com.bbobbogi")
             }
             credentials {
                 username = gprUser ?: ""

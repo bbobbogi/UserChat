@@ -1,20 +1,20 @@
 package com.bbobbogi.userchat.messenger
 
+import com.bbobbogi.messaging.MessagingProvider
+import com.bbobbogi.messaging.api.IStreamBroker
 import com.bbobbogi.userchat.common.model.MessagingMode
 import com.bbobbogi.userchat.common.protocol.ChannelConstants
 import com.bbobbogi.userchat.common.protocol.GlobalChatMessage
 import com.bbobbogi.userchat.common.protocol.MessageType
 import com.bbobbogi.userchat.common.protocol.NoticeMessage
 import com.bbobbogi.userchat.common.protocol.WhisperMessage
-import io.papermc.chzzkmultipleuser.messaging.MessagingProvider
-import io.papermc.chzzkmultipleuser.messaging.api.IStreamBroker
 import org.bukkit.Bukkit
 import org.bukkit.plugin.Plugin
 import java.util.UUID
 import java.util.logging.Logger
 
 /**
- * Redis Stream 모드 (ChzzkMultipleUser 연동)
+ * Redis Stream 모드 (BbobbogiPlugin 연동)
  */
 class RedisMessenger(
     private val plugin: Plugin,
@@ -39,7 +39,7 @@ class RedisMessenger(
     override fun initialize() {
         try {
             if (!MessagingProvider.isInitialized()) {
-                logger.warning("[UserChat] ChzzkMultipleUser MessagingProvider가 초기화되지 않았습니다.")
+                logger.warning("[UserChat] BbobbogiPlugin MessagingProvider가 초기화되지 않았습니다.")
                 return
             }
 
@@ -57,7 +57,7 @@ class RedisMessenger(
 
             logger.info("[UserChat] Redis 메시징 초기화 완료 (서버: $serverId)")
         } catch (e: NoClassDefFoundError) {
-            logger.warning("[UserChat] ChzzkMultipleUser를 찾을 수 없습니다. Redis 모드를 사용할 수 없습니다.")
+            logger.warning("[UserChat] BbobbogiPlugin를 찾을 수 없습니다. Redis 모드를 사용할 수 없습니다.")
         } catch (e: Exception) {
             logger.warning("[UserChat] Redis 초기화 실패: ${e.message}")
             e.printStackTrace()
