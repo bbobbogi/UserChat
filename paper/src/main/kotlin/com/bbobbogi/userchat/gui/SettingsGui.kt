@@ -4,6 +4,7 @@ import com.bbobbogi.userchat.config.UserChatConfig
 import com.bbobbogi.userchat.item.GlobalChatItemManager
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.TextDecoration
+import net.kyori.adventure.text.minimessage.MiniMessage
 import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.entity.Player
@@ -18,8 +19,10 @@ class SettingsGui(
     private val config: UserChatConfig,
     private val itemManager: GlobalChatItemManager,
 ) : Listener {
+    private val miniMessage = MiniMessage.miniMessage()
+
     companion object {
-        private const val GUI_TITLE = "§8UserChat 설정"
+        private const val GUI_TITLE = "<dark_gray>UserChat 설정"
         private const val SLOT_DISTANCE_TOGGLE = 10
         private const val SLOT_DISTANCE_RANGE = 11
         private const val SLOT_REQUIRE_ITEM = 12
@@ -28,7 +31,7 @@ class SettingsGui(
     }
 
     fun open(player: Player) {
-        val inventory = Bukkit.createInventory(null, 27, Component.text(GUI_TITLE))
+        val inventory = Bukkit.createInventory(null, 27, miniMessage.deserialize(GUI_TITLE))
 
         // 거리 기반 채팅 ON/OFF
         inventory.setItem(
@@ -38,9 +41,9 @@ class SettingsGui(
                 enabled = config.distanceEnabled,
                 lore =
                     listOf(
-                        "§7현재 거리: §f${config.distanceRange}블록",
+                        "<gray>현재 거리: <white>${config.distanceRange}블록",
                         "",
-                        "§e클릭하여 ON/OFF",
+                        "<yellow>클릭하여 ON/OFF",
                     ),
             ),
         )
@@ -50,14 +53,14 @@ class SettingsGui(
             SLOT_DISTANCE_RANGE,
             createItem(
                 material = Material.SPYGLASS,
-                name = "§f채팅 거리 설정",
+                name = "<white>채팅 거리 설정",
                 lore =
                     listOf(
-                        "§7현재: §f${config.distanceRange}블록",
+                        "<gray>현재: <white>${config.distanceRange}블록",
                         "",
-                        "§e좌클릭: +10",
-                        "§e우클릭: -10",
-                        "§eShift+클릭: ±50",
+                        "<yellow>좌클릭: +10",
+                        "<yellow>우클릭: -10",
+                        "<yellow>Shift+클릭: ±50",
                     ),
             ),
         )
@@ -70,9 +73,9 @@ class SettingsGui(
                 enabled = config.globalRequireItem,
                 lore =
                     listOf(
-                        "§7활성화 시 아이템 소모",
+                        "<gray>활성화 시 아이템 소모",
                         "",
-                        "§e클릭하여 ON/OFF",
+                        "<yellow>클릭하여 ON/OFF",
                     ),
             ),
         )
@@ -83,7 +86,7 @@ class SettingsGui(
                 editMeta { meta ->
                     val lore = meta.lore()?.toMutableList() ?: mutableListOf()
                     lore.add(Component.empty())
-                    lore.add(Component.text("§7(설정 미리보기)"))
+                    lore.add(miniMessage.deserialize("<gray>(설정 미리보기)"))
                     meta.lore(lore)
                 }
             }
@@ -94,7 +97,7 @@ class SettingsGui(
             SLOT_CLOSE,
             createItem(
                 material = Material.BARRIER,
-                name = "§c닫기",
+                name = "<red>닫기",
             ),
         )
 
@@ -112,7 +115,7 @@ class SettingsGui(
     @EventHandler
     fun onInventoryClick(event: InventoryClickEvent) {
         val title = event.view.title()
-        if (title != Component.text(GUI_TITLE)) return
+        if (title != miniMessage.deserialize(GUI_TITLE)) return
 
         event.isCancelled = true
 
@@ -154,12 +157,12 @@ class SettingsGui(
         lore: List<String>,
     ): ItemStack {
         val material = if (enabled) Material.LIME_DYE else Material.GRAY_DYE
-        val status = if (enabled) "§a활성화" else "§c비활성화"
+        val status = if (enabled) "<green>활성화" else "<red>비활성화"
 
         return createItem(
             material = material,
-            name = "§f$name",
-            lore = listOf("§7상태: $status") + lore,
+            name = "<white>$name",
+            lore = listOf("<gray>상태: $status") + lore,
         )
     }
 
@@ -171,15 +174,15 @@ class SettingsGui(
         ItemStack(material).apply {
             editMeta { meta ->
                 meta.displayName(
-                    Component
-                        .text(name)
+                    miniMessage
+                        .deserialize(name)
                         .decoration(TextDecoration.ITALIC, false),
                 )
                 if (lore.isNotEmpty()) {
                     meta.lore(
                         lore.map { line ->
-                            Component
-                                .text(line)
+                            miniMessage
+                                .deserialize(line)
                                 .decoration(TextDecoration.ITALIC, false)
                         },
                     )

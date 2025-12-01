@@ -4,7 +4,7 @@ import com.bbobbogi.userchat.chat.ChatModeManager
 import com.bbobbogi.userchat.common.model.ChatMode
 import com.bbobbogi.userchat.config.UserChatConfig
 import com.bbobbogi.userchat.item.GlobalChatItemManager
-import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.minimessage.MiniMessage
 import net.kyori.adventure.title.Title
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
@@ -17,6 +17,7 @@ class ItemInteractListener(
     private val itemManager: GlobalChatItemManager,
     private val modeManager: ChatModeManager,
 ) : Listener {
+    private val miniMessage = MiniMessage.miniMessage()
     @EventHandler
     fun onPlayerInteract(event: PlayerInteractEvent) {
         // 우클릭만 처리
@@ -43,8 +44,8 @@ class ItemInteractListener(
             // 타이틀 표시
             player.showTitle(
                 Title.title(
-                    Component.text("§6전체 채팅 모드"),
-                    Component.text("§7다음 채팅부터 전체 채팅됩니다. 채팅당 아이템 1개 소모"),
+                    miniMessage.deserialize("<gold>전체 채팅 모드"),
+                    miniMessage.deserialize("<gray>다음 채팅부터 전체 채팅됩니다. 채팅당 아이템 1개 소모"),
                     Title.Times.times(
                         Duration.ofMillis(500),
                         Duration.ofSeconds(3),

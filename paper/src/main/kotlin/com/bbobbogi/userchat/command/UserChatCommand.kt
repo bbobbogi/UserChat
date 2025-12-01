@@ -7,6 +7,7 @@ import com.bbobbogi.userchat.config.UserChatConfig
 import com.bbobbogi.userchat.gui.SettingsGui
 import com.bbobbogi.userchat.item.GlobalChatItemManager
 import com.bbobbogi.userchat.service.IUserNameProvider
+import net.kyori.adventure.text.minimessage.MiniMessage
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -22,6 +23,7 @@ class UserChatCommand(
     private val globalChatHandler: GlobalChatHandler,
 ) : CommandExecutor,
     TabCompleter {
+    private val miniMessage = MiniMessage.miniMessage()
     override fun onCommand(
         sender: CommandSender,
         command: Command,
@@ -130,7 +132,7 @@ class UserChatCommand(
 
         val warnings = config.reload()
         sender.sendMessage(config.getMessage("config-reloaded"))
-        warnings.forEach { sender.sendMessage("§e[경고] $it") }
+        warnings.forEach { sender.sendMessage(miniMessage.deserialize("<yellow>[경고] $it")) }
     }
 
     private fun handleSettings(sender: CommandSender) {
@@ -148,17 +150,17 @@ class UserChatCommand(
     }
 
     private fun sendHelp(sender: CommandSender) {
-        sender.sendMessage("§6=== UserChat 도움말 ===")
-        sender.sendMessage("§e/유저채팅 모드 [거리|전체] §7- 채팅 모드 확인/변경")
+        sender.sendMessage(miniMessage.deserialize("<gold>=== UserChat 도움말 ==="))
+        sender.sendMessage(miniMessage.deserialize("<yellow>/유저채팅 모드 [거리|전체] <gray>- 채팅 모드 확인/변경"))
 
         if (sender.hasPermission("userchat.notice")) {
-            sender.sendMessage("§e/유저채팅 공지 <메시지> §7- 전체 서버 공지")
+            sender.sendMessage(miniMessage.deserialize("<yellow>/유저채팅 공지 <메시지> <gray>- 전체 서버 공지"))
         }
 
         if (sender.hasPermission("userchat.admin")) {
-            sender.sendMessage("§e/유저채팅 아이템지급 <플레이어> [수량] §7- 전체 채팅권 지급")
-            sender.sendMessage("§e/유저채팅 재로드 §7- 설정 리로드")
-            sender.sendMessage("§e/유저채팅 관리 §7- GUI 설정 열기")
+            sender.sendMessage(miniMessage.deserialize("<yellow>/유저채팅 아이템지급 <플레이어> [수량] <gray>- 전체 채팅권 지급"))
+            sender.sendMessage(miniMessage.deserialize("<yellow>/유저채팅 재로드 <gray>- 설정 리로드"))
+            sender.sendMessage(miniMessage.deserialize("<yellow>/유저채팅 관리 <gray>- GUI 설정 열기"))
         }
     }
 
