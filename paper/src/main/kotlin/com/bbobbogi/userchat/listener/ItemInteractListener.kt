@@ -18,6 +18,7 @@ class ItemInteractListener(
     private val modeManager: ChatModeManager,
 ) : Listener {
     private val miniMessage = MiniMessage.miniMessage()
+
     @EventHandler
     fun onPlayerInteract(event: PlayerInteractEvent) {
         // 우클릭만 처리

@@ -24,6 +24,7 @@ class UserChatCommand(
 ) : CommandExecutor,
     TabCompleter {
     private val miniMessage = MiniMessage.miniMessage()
+
     override fun onCommand(
         sender: CommandSender,
         command: Command,
