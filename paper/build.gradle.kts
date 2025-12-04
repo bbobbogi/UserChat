@@ -126,4 +126,21 @@ tasks {
     build {
         dependsOn(shadowJar)
     }
+
+    // Git pre-commit hook 설치 태스크
+    register("installGitHooks") {
+        group = "git"
+        description = "Install git hooks for pre-commit ktlint check"
+        doLast {
+            exec {
+                commandLine("git", "config", "core.hooksPath", ".githooks")
+            }
+            println("Git hooks installed.")
+        }
+    }
+
+    // 첫 빌드 시 자동으로 hook 설치
+    named("compileKotlin") {
+        dependsOn("installGitHooks")
+    }
 }
