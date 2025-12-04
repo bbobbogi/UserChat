@@ -2,40 +2,15 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches: [main, develop]
   pull_request:
-    branches: [main]
-
-permissions:
-  contents: read
-  packages: read
+    branches: [main, develop]
 
 jobs:
   build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Set up JDK 21
-        uses: actions/setup-java@v4
-        with:
-          java-version: '21'
-          distribution: 'temurin'
-
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
-
-      - name: Build and Test
-        run: ./gradlew build test
-        env:
-          GITHUB_ACTOR: ${{ github.actor }}
-          GITHUB_TOKEN: ${{ secrets.BBOBBOGI_READ_PACKAGES_TOKEN }}
-
-      - name: Upload Artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: jars
-          path: |
-            paper/build/libs/UserChat-Paper-*.jar
-            velocity/build/libs/UserChat-Velocity-*.jar
-          retention-days: 1
+    uses: ./.github/workflows/build-reusable.yml
+    with:
+      artifact-name: build-${{ github.sha }}
+      retention-days: 1
+    secrets:
+      BBOBBOGI_READ_PACKAGES_TOKEN: ${{ secrets.BBOBBOGI_READ_PACKAGES_TOKEN }}
