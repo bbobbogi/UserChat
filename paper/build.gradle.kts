@@ -132,7 +132,7 @@ tasks {
         group = "git"
         description = "Install git hooks for pre-commit ktlint check"
         doLast {
-            exec {
+            providers.exec {
                 commandLine("git", "config", "core.hooksPath", ".githooks")
             }
             println("Git hooks installed.")
