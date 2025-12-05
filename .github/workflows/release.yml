@@ -6,20 +6,28 @@ on:
       - 'v*'
 
 jobs:
-  prep:
+  prepare:
     runs-on: ubuntu-latest
     outputs:
-      version: ${{ steps.version.outputs.VERSION }}
+      version: ${{ steps.parse.outputs.VERSION }}
     steps:
-      - name: Extract version from tag
-        id: version
-        run: echo "VERSION=${GITHUB_REF_NAME#v}" >> $GITHUB_OUTPUT
+      - name: Parse version from tag
+        id: parse
+        run: |
+          TAG=${GITHUB_REF#refs/tags/}
+          if [[ "$TAG" =~ ^v([0-9]+\.[0-9]+\.[0-9]+.*)$ ]]; then
+            VERSION="${BASH_REMATCH[1]}"
+          else
+            echo "Invalid tag format: $TAG (expected v1.0.0)"
+            exit 1
+          fi
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
 
   build:
-    needs: prep
+    needs: prepare
     uses: ./.github/workflows/build-reusable.yml
     with:
-      build-args: -Pversion=${{ needs.prep.outputs.version }}
+      build-args: "-Pversion=${{ needs.prepare.outputs.version }}"
       artifact-name: release-${{ github.ref_name }}
       retention-days: 1
     secrets:
