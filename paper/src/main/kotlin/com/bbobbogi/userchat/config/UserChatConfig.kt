@@ -122,75 +122,64 @@ class UserChatConfig(
         playerName: String,
         displayName: String,
         message: String,
-    ): Component {
-        val format =
-            messages.getOrDefault(
-                "distance-format",
-                "<gray>[근처]</gray> <white>%player%</white>: %message%",
-            )
-        return miniMessage.deserialize(
-            format
-                .replace("%player_name%", playerName)
-                .replace("%player%", displayName)
-                .replace("%message%", miniMessage.escapeTags(message)),
+    ): Component =
+        messages.getComponentOrDefault(
+            "distance-format",
+            "<gray>[근처]</gray> <white>%player%</white>: %message%",
+            "player_name" to playerName,
+            "player" to displayName,
+            "message" to miniMessage.escapeTags(message),
         )
-    }
 
     fun formatGlobalChat(
         serverName: String,
         playerName: String,
         displayName: String,
         message: String,
-    ): Component {
-        val format =
-            messages.getOrDefault(
-                "global-format",
-                "<gold>[전체]</gold> <gray>[%server%]</gray> <white>%player%</white>: %message%",
-            )
-        return miniMessage.deserialize(
-            format
-                .replace("%server%", serverName)
-                .replace("%player_name%", playerName)
-                .replace("%player%", displayName)
-                .replace("%message%", miniMessage.escapeTags(message)),
+    ): Component =
+        messages.getComponentOrDefault(
+            "global-format",
+            "<gold>[전체]</gold> <gray>[%server%]</gray> <white>%player%</white>: %message%",
+            "server" to serverName,
+            "player_name" to playerName,
+            "player" to displayName,
+            "message" to miniMessage.escapeTags(message),
         )
-    }
 
     fun formatWhisperSent(
         targetName: String,
         targetDisplayName: String,
         message: String,
-    ): Component {
-        val format = messages.getOrDefault("whisper-sent", "<gray>[나 → %target%] %message%</gray>")
-        return miniMessage.deserialize(
-            format
-                .replace("%target_name%", targetName)
-                .replace("%target%", targetDisplayName)
-                .replace("%message%", miniMessage.escapeTags(message)),
+    ): Component =
+        messages.getComponentOrDefault(
+            "whisper-sent",
+            "<gray>[나 → %target%] %message%</gray>",
+            "target_name" to targetName,
+            "target" to targetDisplayName,
+            "message" to miniMessage.escapeTags(message),
         )
-    }
 
     fun formatWhisperReceived(
         senderName: String,
         senderDisplayName: String,
         message: String,
-    ): Component {
-        val format = messages.getOrDefault("whisper-received", "<gray>[%sender% → 나] %message%</gray>")
-        return miniMessage.deserialize(
-            format
-                .replace("%sender_name%", senderName)
-                .replace("%sender%", senderDisplayName)
-                .replace("%message%", miniMessage.escapeTags(message)),
+    ): Component =
+        messages.getComponentOrDefault(
+            "whisper-received",
+            "<gray>[%sender% → 나] %message%</gray>",
+            "sender_name" to senderName,
+            "sender" to senderDisplayName,
+            "message" to miniMessage.escapeTags(message),
         )
-    }
 
     fun formatNotice(
         senderName: String,
         message: String,
-    ): Component {
-        val format = messages.getOrDefault("notice-format", "<red>[공지]</red> <yellow>%sender%</yellow>: %message%")
-        return miniMessage.deserialize(
-            format.replace("%sender%", senderName).replace("%message%", miniMessage.escapeTags(message)),
+    ): Component =
+        messages.getComponentOrDefault(
+            "notice-format",
+            "<red>[공지]</red> <yellow>%sender%</yellow>: %message%",
+            "sender" to senderName,
+            "message" to miniMessage.escapeTags(message),
         )
-    }
 }
