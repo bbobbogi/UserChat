@@ -1,16 +1,18 @@
 package com.bbobbogi.userchat.config
 
+import com.bbobbogi.core.message.MessageService
 import com.bbobbogi.userchat.common.model.ChatMode
 import com.bbobbogi.userchat.common.model.MessagingMode
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.minimessage.MiniMessage
 import org.bukkit.Material
-import org.bukkit.plugin.Plugin
+import org.bukkit.plugin.java.JavaPlugin
 
 class UserChatConfig(
-    private val plugin: Plugin,
+    private val plugin: JavaPlugin,
 ) {
     private val miniMessage = MiniMessage.miniMessage()
+    val messages: MessageService = MessageService(plugin, "messages.yml")
 
     // Messaging
     var messagingMode: MessagingMode = MessagingMode.OFF
@@ -35,9 +37,6 @@ class UserChatConfig(
         private set
     var itemLore: List<String> = listOf()
         private set
-
-    // Messages
-    private var messages: Map<String, String> = mapOf()
 
     fun load() {
         plugin.saveDefaultConfig()
@@ -66,13 +65,7 @@ class UserChatConfig(
         itemLore = config.getStringList("item.lore")
 
         // Messages
-        val messagesSection = config.getConfigurationSection("messages")
-        if (messagesSection != null) {
-            messages =
-                messagesSection.getKeys(false).associateWith { key ->
-                    messagesSection.getString(key, "") ?: ""
-                }
-        }
+        messages.reload()
     }
 
     fun save() {
@@ -107,17 +100,14 @@ class UserChatConfig(
     fun getMessage(
         key: String,
         vararg replacements: Pair<String, String>,
-    ): Component {
-        var message = messages[key] ?: return Component.text("Missing message: $key")
+    ): Component =
+        messages.getComponentOrDefault(
+            key,
+            "Missing message: $key",
+            *replacements,
+        )
 
-        for ((placeholder, value) in replacements) {
-            message = message.replace("%$placeholder%", value)
-        }
-
-        return miniMessage.deserialize(message)
-    }
-
-    fun getMessageRaw(key: String): String = messages[key] ?: ""
+    fun getMessageRaw(key: String): String = messages.getOrDefault(key, "")
 
     fun getItemDisplayNameComponent(): Component = miniMessage.deserialize(itemDisplayName)
 
@@ -127,71 +117,64 @@ class UserChatConfig(
         playerName: String,
         displayName: String,
         message: String,
-    ): Component {
-        val format =
-            messages["distance-format"]
-                ?: "<gray>[근처]</gray> <white>%player%</white>: %message%"
-        return miniMessage.deserialize(
-            format
-                .replace("%player_name%", playerName)
-                .replace("%player%", displayName)
-                .replace("%message%", miniMessage.escapeTags(message)),
+    ): Component =
+        messages.getComponentOrDefault(
+            "distance-format",
+            "<gray>[근처]</gray> <white>%player%</white>: %message%",
+            "player_name" to playerName,
+            "player" to displayName,
+            "message" to miniMessage.escapeTags(message),
         )
-    }
 
     fun formatGlobalChat(
         serverName: String,
         playerName: String,
         displayName: String,
         message: String,
-    ): Component {
-        val format =
-            messages["global-format"]
-                ?: "<gold>[전체]</gold> <gray>[%server%]</gray> <white>%player%</white>: %message%"
-        return miniMessage.deserialize(
-            format
-                .replace("%server%", serverName)
-                .replace("%player_name%", playerName)
-                .replace("%player%", displayName)
-                .replace("%message%", miniMessage.escapeTags(message)),
+    ): Component =
+        messages.getComponentOrDefault(
+            "global-format",
+            "<gold>[전체]</gold> <gray>[%server%]</gray> <white>%player%</white>: %message%",
+            "server" to serverName,
+            "player_name" to playerName,
+            "player" to displayName,
+            "message" to miniMessage.escapeTags(message),
         )
-    }
 
     fun formatWhisperSent(
         targetName: String,
         targetDisplayName: String,
         message: String,
-    ): Component {
-        val format = messages["whisper-sent"] ?: "<gray>[나 → %target%] %message%</gray>"
-        return miniMessage.deserialize(
-            format
-                .replace("%target_name%", targetName)
-                .replace("%target%", targetDisplayName)
-                .replace("%message%", miniMessage.escapeTags(message)),
+    ): Component =
+        messages.getComponentOrDefault(
+            "whisper-sent",
+            "<gray>[나 → %target%] %message%</gray>",
+            "target_name" to targetName,
+            "target" to targetDisplayName,
+            "message" to miniMessage.escapeTags(message),
         )
-    }
 
     fun formatWhisperReceived(
         senderName: String,
         senderDisplayName: String,
         message: String,
-    ): Component {
-        val format = messages["whisper-received"] ?: "<gray>[%sender% → 나] %message%</gray>"
-        return miniMessage.deserialize(
-            format
-                .replace("%sender_name%", senderName)
-                .replace("%sender%", senderDisplayName)
-                .replace("%message%", miniMessage.escapeTags(message)),
+    ): Component =
+        messages.getComponentOrDefault(
+            "whisper-received",
+            "<gray>[%sender% → 나] %message%</gray>",
+            "sender_name" to senderName,
+            "sender" to senderDisplayName,
+            "message" to miniMessage.escapeTags(message),
         )
-    }
 
     fun formatNotice(
         senderName: String,
         message: String,
-    ): Component {
-        val format = messages["notice-format"] ?: "<red>[공지]</red> <yellow>%sender%</yellow>: %message%"
-        return miniMessage.deserialize(
-            format.replace("%sender%", senderName).replace("%message%", miniMessage.escapeTags(message)),
+    ): Component =
+        messages.getComponentOrDefault(
+            "notice-format",
+            "<red>[공지]</red> <yellow>%sender%</yellow>: %message%",
+            "sender" to senderName,
+            "message" to miniMessage.escapeTags(message),
         )
-    }
 }

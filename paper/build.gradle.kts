@@ -103,6 +103,7 @@ dependencies {
     testImplementation(libs.mockito.core)
     testImplementation(libs.mockito.kotlin)
     testImplementation(libs.junit.jupiter)
+    testImplementation(libs.bundles.bbobbogi)
 
     // Integration test dependencies
     testImplementation(libs.testcontainers)

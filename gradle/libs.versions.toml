@@ -6,7 +6,7 @@ shadow = "9.2.2"
 run-paper = "3.0.2"
 resource-factory = "1.3.1"
 kotlinx-serialization = "1.6.3"
-bbobbogi = "0.1.18"
+bbobbogi = "0.1.21"
 exposed = "0.57.0"
 essentialsx = "2.21.2"
 placeholderapi = "2.11.6"
@@ -49,6 +49,9 @@ junit-jupiter = { group = "org.junit.jupiter", name = "junit-jupiter", version.r
 testcontainers = { group = "org.testcontainers", name = "testcontainers", version.ref = "testcontainers" }
 testcontainers-junit = { group = "org.testcontainers", name = "junit-jupiter", version.ref = "testcontainers" }
 lettuce = { group = "io.lettuce", name = "lettuce-core", version.ref = "lettuce" }
+
+[bundles]
+bbobbogi = ["bbobbogi-core", "bbobbogi-database", "bbobbogi-user", "bbobbogi-messaging"]
 
 [plugins]
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
