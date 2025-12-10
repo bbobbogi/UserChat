@@ -12,8 +12,7 @@ class UserChatConfig(
     private val plugin: JavaPlugin,
 ) {
     private val miniMessage = MiniMessage.miniMessage()
-    lateinit var messages: MessageService
-        private set
+    val messages: MessageService = MessageService(plugin, "messages.yml")
 
     // Messaging
     var messagingMode: MessagingMode = MessagingMode.OFF
@@ -66,11 +65,7 @@ class UserChatConfig(
         itemLore = config.getStringList("item.lore")
 
         // Messages
-        if (!::messages.isInitialized) {
-            messages = MessageService(plugin, "messages.yml")
-        } else {
-            messages.reload()
-        }
+        messages.reload()
     }
 
     fun save() {
