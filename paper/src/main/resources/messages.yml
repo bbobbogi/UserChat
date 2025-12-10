@@ -1,0 +1,36 @@
+# UserChat 메시지
+# MiniMessage 포맷, 플레이스홀더: %name%
+
+prefix: "<gold>[채팅]</gold> "
+
+# 채팅 포맷 (%player% = 표시 이름, %player_name% = 순수 닉네임, %server% = 서버명)
+distance-format: "<gray>[근처]</gray> <click:suggest_command:'/귓속말 %player_name% '><hover:show_text:'<gray>클릭하여 귓속말'>%player%</hover></click>: %message%"
+global-format: "<gold>[전체]</gold> <gray>[%server%]</gray> <click:suggest_command:'/귓속말 %player_name% '><hover:show_text:'<gray>클릭하여 귓속말'>%player%</hover></click>: %message%"
+
+# 공지 포맷
+notice-format: "<red>[공지]</red> <yellow>%sender%</yellow>: %message%"
+
+# 시스템 메시지
+mode-changed: "<gray>채팅 모드가 <yellow>%mode%</yellow>로 변경되었습니다.</gray>"
+mode-current: "<gray>현재 채팅 모드: <yellow>%mode%</yellow></gray>"
+global-mode-activated: "<gold>전체 채팅 모드</gold> 활성화. 다음 채팅부터 전체 채팅됩니다."
+global-mode-deactivated: "<gray>채팅 모드가 <white>거리 기반</white>으로 변경되었습니다.</gray>"
+item-consumed: "<gray>전체 채팅권 1개 소모 (남은 수량: <white>%remaining%</white>)</gray>"
+no-item: "<red>전체 채팅권이 필요합니다!</red>"
+no-item-switched: "<red>전체 채팅권이 부족하여 거리 기반 채팅으로 전환되었습니다.</red>"
+item-given: "<green>전체 채팅권 %amount%개를 받았습니다.</green>"
+item-given-admin: "<green>%player%에게 전체 채팅권 %amount%개를 지급했습니다.</green>"
+config-reloaded: "<green>설정을 리로드했습니다.</green>"
+
+# 귓속말 (%target% = 표시 이름, %target_name% = 순수 닉네임, %sender% = 표시 이름, %sender_name% = 순수 닉네임)
+whisper-sent: "<gray>[나 → </gray>%target%<gray>]</gray> %message%"
+whisper-received: "<click:suggest_command:'/귓속말 %sender_name% '><hover:show_text:'<gray>클릭하여 답장'><gray>[</gray>%sender%<gray> → 나]</gray> %message%</hover></click>"
+no-reply-target: "<red>답장할 대상이 없습니다.</red>"
+player-not-found: "<red>'%player%' 플레이어를 찾을 수 없습니다.</red>"
+whisper-self: "<red>자기 자신에게는 귓속말을 보낼 수 없습니다.</red>"
+
+# 에러
+no-permission: "<red>권한이 없습니다.</red>"
+player-only: "<red>플레이어만 사용 가능합니다.</red>"
+invalid-mode: "<red>올바른 모드: 거리, 전체</red>"
+invalid-usage: "<red>사용법: %usage%</red>"

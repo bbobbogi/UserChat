@@ -1,16 +1,19 @@
 package com.bbobbogi.userchat.config
 
+import com.bbobbogi.core.message.MessageService
 import com.bbobbogi.userchat.common.model.ChatMode
 import com.bbobbogi.userchat.common.model.MessagingMode
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.minimessage.MiniMessage
 import org.bukkit.Material
-import org.bukkit.plugin.Plugin
+import org.bukkit.plugin.java.JavaPlugin
 
 class UserChatConfig(
-    private val plugin: Plugin,
+    private val plugin: JavaPlugin,
 ) {
     private val miniMessage = MiniMessage.miniMessage()
+    lateinit var messages: MessageService
+        private set
 
     // Messaging
     var messagingMode: MessagingMode = MessagingMode.OFF
@@ -35,9 +38,6 @@ class UserChatConfig(
         private set
     var itemLore: List<String> = listOf()
         private set
-
-    // Messages
-    private var messages: Map<String, String> = mapOf()
 
     fun load() {
         plugin.saveDefaultConfig()
@@ -66,12 +66,10 @@ class UserChatConfig(
         itemLore = config.getStringList("item.lore")
 
         // Messages
-        val messagesSection = config.getConfigurationSection("messages")
-        if (messagesSection != null) {
-            messages =
-                messagesSection.getKeys(false).associateWith { key ->
-                    messagesSection.getString(key, "") ?: ""
-                }
+        if (!::messages.isInitialized) {
+            messages = MessageService(plugin, "messages.yml")
+        } else {
+            messages.reload()
         }
     }
 
@@ -107,17 +105,14 @@ class UserChatConfig(
     fun getMessage(
         key: String,
         vararg replacements: Pair<String, String>,
-    ): Component {
-        var message = messages[key] ?: return Component.text("Missing message: $key")
+    ): Component =
+        messages.getComponentOrDefault(
+            key,
+            "Missing message: $key",
+            *replacements,
+        )
 
-        for ((placeholder, value) in replacements) {
-            message = message.replace("%$placeholder%", value)
-        }
-
-        return miniMessage.deserialize(message)
-    }
-
-    fun getMessageRaw(key: String): String = messages[key] ?: ""
+    fun getMessageRaw(key: String): String = messages.getOrDefault(key, "")
 
     fun getItemDisplayNameComponent(): Component = miniMessage.deserialize(itemDisplayName)
 
@@ -129,8 +124,10 @@ class UserChatConfig(
         message: String,
     ): Component {
         val format =
-            messages["distance-format"]
-                ?: "<gray>[근처]</gray> <white>%player%</white>: %message%"
+            messages.getOrDefault(
+                "distance-format",
+                "<gray>[근처]</gray> <white>%player%</white>: %message%",
+            )
         return miniMessage.deserialize(
             format
                 .replace("%player_name%", playerName)
@@ -146,8 +143,10 @@ class UserChatConfig(
         message: String,
     ): Component {
         val format =
-            messages["global-format"]
-                ?: "<gold>[전체]</gold> <gray>[%server%]</gray> <white>%player%</white>: %message%"
+            messages.getOrDefault(
+                "global-format",
+                "<gold>[전체]</gold> <gray>[%server%]</gray> <white>%player%</white>: %message%",
+            )
         return miniMessage.deserialize(
             format
                 .replace("%server%", serverName)
@@ -162,7 +161,7 @@ class UserChatConfig(
         targetDisplayName: String,
         message: String,
     ): Component {
-        val format = messages["whisper-sent"] ?: "<gray>[나 → %target%] %message%</gray>"
+        val format = messages.getOrDefault("whisper-sent", "<gray>[나 → %target%] %message%</gray>")
         return miniMessage.deserialize(
             format
                 .replace("%target_name%", targetName)
@@ -176,7 +175,7 @@ class UserChatConfig(
         senderDisplayName: String,
         message: String,
     ): Component {
-        val format = messages["whisper-received"] ?: "<gray>[%sender% → 나] %message%</gray>"
+        val format = messages.getOrDefault("whisper-received", "<gray>[%sender% → 나] %message%</gray>")
         return miniMessage.deserialize(
             format
                 .replace("%sender_name%", senderName)
@@ -189,7 +188,7 @@ class UserChatConfig(
         senderName: String,
         message: String,
     ): Component {
-        val format = messages["notice-format"] ?: "<red>[공지]</red> <yellow>%sender%</yellow>: %message%"
+        val format = messages.getOrDefault("notice-format", "<red>[공지]</red> <yellow>%sender%</yellow>: %message%")
         return miniMessage.deserialize(
             format.replace("%sender%", senderName).replace("%message%", miniMessage.escapeTags(message)),
         )
